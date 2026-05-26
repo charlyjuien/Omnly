@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Omnly — L'assistant business tout-en-un</title>
+<link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --black: #0A0A0A;
+  --white: #FAFAF8;
+  --cream: #F5F0E8;
+  --accent: #FF4D00;
+  --accent2: #FFB800;
+  --muted: rgba(10,10,10,0.45);
+  --border: rgba(10,10,10,0.08);
+}
+html { scroll-behavior: smooth; }
+body {
+  background: var(--white);
+  color: var(--black);
+  font-family: 'Cabinet Grotesk', sans-serif;
+  overflow-x: hidden;
+}
+
+/* NAV */
+nav {
+  position: fixed; top: 0; width: 100%; z-index: 100;
+  padding: 18px 64px;
+  display: flex; justify-content: space-between; align-items: center;
+  background: rgba(250,250,248,0.85); backdrop-filter: blur(24px);
+  border-bottom: 1px solid var(--border);
+}
+.logo {
+  font-size: 22px; font-weight: 900; letter-spacing: -0.5px;
+  color: var(--black); text-decoration: none;
+}
+.logo em { font-style: normal; color: var(--accent); }
+.nav-links { display: flex; gap: 36px; list-style: none; }
+.nav-links a {
+  text-decoration: none; color: var(--black);
+  font-size: 14px; font-weight: 500; opacity: 0.6;
+  transition: opacity 0.2s;
+}
+.nav-links a:hover { opacity: 1; }
+.nav-cta {
+  background: var(--black); color: var(--white);
+  padding: 11px 26px; font-size: 14px; font-weight: 700;
+  text-decoration: none; border-radius: 100px;
+  transition: all 0.3s;
+}
+.nav-cta:hover { background: var(--accent); }
+
+/* HERO */
+.hero {
+  min-height: 100vh;
+  padding: 120px 64px 80px;
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 80px; align-items: center;
+  position: relative; overflow: hidden;
+}
+.hero-bg {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 60% 50% at 70% 50%, rgba(255,77,0,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-grid {
+  position: absolute; inset: 0;
+  background-image: linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 0%, transparent 100%);
+  pointer-events: none;
+}
+
+.hero-left { position: relative; z-index: 2; }
+.hero-tag {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--cream); border: 1px solid var(--border);
+  padding: 6px 14px; border-radius: 100px;
+  font-size: 13px; font-weight: 600; margin-bottom: 32px;
+  color: var(--black);
+}
+.tag-dot {
+  width: 7px; height: 7px; background: var(--accent);
+  border-radius: 50%; animation: pulse 2s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.3)} }
+
+.hero-title {
+  font-size: 76px; line-height: 1.0; font-weight: 900;
+  letter-spacing: -2px; margin-bottom: 28px;
+}
+.hero-title .serif {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic; font-weight: 400;
+  color: var(--accent);
+}
+.hero-desc {
+  font-size: 18px; line-height: 1.7; color: var(--muted);
+  max-width: 480px; margin-bottom: 48px; font-weight: 500;
+}
+.hero-actions { display: flex; gap: 14px; align-items: center; margin-bottom: 56px; }
+.btn-primary {
+  background: var(--black); color: var(--white);
+  padding: 16px 36px; border-radius: 100px;
+  font-size: 16px; font-weight: 700; text-decoration: none;
+  transition: all 0.3s; box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+}
+.btn-primary:hover { background: var(--accent); transform: translateY(-2px); }
+.btn-secondary {
+  color: var(--black); font-size: 15px; font-weight: 600;
+  text-decoration: none; opacity: 0.6; transition: opacity 0.2s;
+  display: flex; align-items: center; gap: 6px;
+}
+.btn-secondary:hover { opacity: 1; }
+.hero-features { display: flex; gap: 32px; }
+.hfeat {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; font-weight: 600; color: var(--muted);
+}
+.hfeat-icon { font-size: 16px; }
+
+/* HERO RIGHT — FEATURES GRID */
+.hero-right { position: relative; z-index: 2; }
+.features-mosaic { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.feat-card {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: 20px; padding: 24px;
+  transition: all 0.3s; cursor: pointer;
+  position: relative; overflow: hidden;
+}
+.feat-card::before {
+  content: ''; position: absolute;
+  top: 0; left: 0; right: 0; height: 3px;
+  background: var(--accent); transform: scaleX(0);
+  transform-origin: left; transition: transform 0.3s;
+}
+.feat-card:hover { border-color: rgba(255,77,0,0.2); box-shadow: 0 8px 40px rgba(0,0,0,0.08); transform: translateY(-3px); }
+.feat-card:hover::before { transform: scaleX(1); }
+.feat-card.span-2 { grid-column: span 2; }
+.feat-emoji { font-size: 28px; margin-bottom: 12px; display: block; }
+.feat-title { font-size: 15px; font-weight: 800; margin-bottom: 6px; }
+.feat-desc { font-size: 13px; color: var(--muted); line-height: 1.5; font-weight: 500; }
+.feat-badge {
+  display: inline-block; background: var(--cream);
+  padding: 3px 10px; border-radius: 100px;
+  font-size: 11px; font-weight: 700; margin-top: 10px;
+  color: var(--accent);
+}
+
+/* MARQUEE */
+.marquee-section {
+  background: var(--black); padding: 20px 0;
+  overflow: hidden; border-top: 1px solid rgba(255,255,255,0.06);
+}
+.marquee-track {
+  display: flex; gap: 64px;
+  animation: marquee 20s linear infinite; white-space: nowrap;
+}
+.marquee-item {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 14px; font-weight: 700; color: rgba(255,255,255,0.5);
+  letter-spacing: 1px; text-transform: uppercase; flex-shrink: 0;
+}
+.marquee-dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; flex-shrink: 0; }
+@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+/* HOW IT WORKS */
+.how { padding: 120px 64px; background: var(--cream); }
+.section-header { margin-bottom: 72px; }
+.section-eyebrow {
+  font-size: 12px; font-weight: 800; letter-spacing: 3px;
+  text-transform: uppercase; color: var(--accent); margin-bottom: 16px;
+}
+.section-title {
+  font-size: 56px; font-weight: 900; letter-spacing: -1.5px; line-height: 1.05;
+}
+.section-title .serif {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic; font-weight: 400;
+}
+.steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+.step {
+  background: var(--white); border-radius: 24px;
+  padding: 40px 32px; position: relative;
+  border: 1px solid var(--border); transition: all 0.3s;
+}
+.step:hover { transform: translateY(-6px); box-shadow: 0 24px 60px rgba(0,0,0,0.08); }
+.step-num {
+  font-size: 80px; font-weight: 900; line-height: 1;
+  color: rgba(10,10,10,0.05); position: absolute;
+  top: 20px; right: 24px; letter-spacing: -3px;
+}
+.step-icon { font-size: 36px; margin-bottom: 20px; display: block; }
+.step-title { font-size: 20px; font-weight: 800; margin-bottom: 10px; }
+.step-desc { font-size: 14px; color: var(--muted); line-height: 1.7; font-weight: 500; }
+
+/* FEATURES DEEP */
+.features-deep { padding: 120px 64px; background: var(--white); }
+.features-list { display: flex; flex-direction: column; gap: 2px; }
+.feature-row {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 0; border: 1px solid var(--border);
+  border-radius: 20px; overflow: hidden; margin-bottom: 12px;
+  transition: all 0.3s;
+}
+.feature-row:hover { box-shadow: 0 8px 40px rgba(0,0,0,0.06); }
+.feature-content { padding: 48px; }
+.feature-icon-big { font-size: 48px; margin-bottom: 20px; display: block; }
+.feature-title-big { font-size: 28px; font-weight: 900; margin-bottom: 12px; letter-spacing: -0.5px; }
+.feature-desc-big { font-size: 15px; color: var(--muted); line-height: 1.8; font-weight: 500; max-width: 400px; }
+.feature-visual {
+  background: var(--cream); padding: 48px;
+  display: flex; flex-direction: column; gap: 12px; justify-content: center;
+}
+.feature-visual.dark { background: var(--black); }
+.mock-card {
+  background: var(--white); border-radius: 12px;
+  padding: 16px 18px; border: 1px solid var(--border);
+  font-size: 13px; font-weight: 600; display: flex;
+  align-items: center; gap: 10px;
+}
+.mock-card.dark-card {
+  background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.8);
+}
+.mock-icon { font-size: 18px; }
+.mock-text { flex: 1; }
+.mock-badge {
+  background: var(--accent); color: white;
+  padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: 700;
+}
+.mock-badge.green { background: #10B981; }
+
+/* PRICING */
+.pricing { padding: 120px 64px; background: var(--black); }
+.pricing .section-eyebrow { color: var(--accent2); }
+.pricing .section-title { color: var(--white); }
+.pricing-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 72px; }
+.pricing-card {
+  background: rgba(255,255,255,0.04); border-radius: 24px;
+  border: 1px solid rgba(255,255,255,0.08); padding: 40px 32px;
+  transition: all 0.3s; position: relative; overflow: hidden;
+}
+.pricing-card:hover { background: rgba(255,255,255,0.07); transform: translateY(-4px); }
+.pricing-card.featured {
+  background: var(--accent); border-color: var(--accent);
+  box-shadow: 0 24px 80px rgba(255,77,0,0.3);
+}
+.pricing-card.featured:hover { transform: translateY(-4px) scale(1.02); }
+.featured-badge {
+  position: absolute; top: 20px; right: 20px;
+  background: rgba(255,255,255,0.2); color: white;
+  padding: 4px 12px; border-radius: 100px;
+  font-size: 11px; font-weight: 800;
+}
+.card-icon { font-size: 32px; margin-bottom: 20px; display: block; }
+.card-name { font-size: 18px; font-weight: 800; color: white; margin-bottom: 8px; }
+.card-desc { font-size: 13px; color: rgba(255,255,255,0.55); margin-bottom: 32px; line-height: 1.6; font-weight: 500; }
+.card-price { margin-bottom: 32px; }
+.price { font-size: 56px; font-weight: 900; color: white; line-height: 1; }
+.price sup { font-size: 24px; vertical-align: top; margin-top: 12px; display: inline-block; }
+.price-period { font-size: 14px; color: rgba(255,255,255,0.5); margin-top: 4px; font-weight: 500; }
+.card-features { list-style: none; margin-bottom: 36px; display: flex; flex-direction: column; gap: 10px; }
+.card-features li { display: flex; align-items: center; gap: 10px; font-size: 14px; color: rgba(255,255,255,0.8); font-weight: 500; }
+.check { color: white; font-size: 12px; }
+.card-btn {
+  width: 100%; padding: 16px; border-radius: 14px;
+  font-family: 'Cabinet Grotesk', sans-serif;
+  font-size: 15px; font-weight: 800; cursor: pointer;
+  border: none; transition: all 0.3s; text-align: center;
+  text-decoration: none; display: block;
+}
+.btn-white { background: white; color: var(--black); }
+.btn-white:hover { background: var(--cream); }
+.btn-transparent { background: rgba(255,255,255,0.12); color: white; border: 1px solid rgba(255,255,255,0.2); }
+.btn-transparent:hover { background: rgba(255,255,255,0.2); }
+
+/* CTA SECTION */
+.cta-section {
+  padding: 120px 64px; background: var(--white);
+  text-align: center;
+}
+.cta-title {
+  font-size: 72px; font-weight: 900; letter-spacing: -2px;
+  line-height: 1.0; margin-bottom: 24px;
+}
+.cta-title .serif { font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400; color: var(--accent); }
+.cta-desc { font-size: 18px; color: var(--muted); margin-bottom: 48px; font-weight: 500; }
+.cta-btn {
+  background: var(--black); color: white;
+  padding: 20px 56px; border-radius: 100px;
+  font-size: 18px; font-weight: 800; text-decoration: none;
+  display: inline-block; transition: all 0.3s;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+}
+.cta-btn:hover { background: var(--accent); transform: translateY(-3px); }
+.cta-note { font-size: 14px; color: var(--muted); margin-top: 20px; font-weight: 500; }
+
+/* FOOTER */
+footer {
+  background: var(--black); padding: 48px 64px;
+  display: flex; justify-content: space-between; align-items: center;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+.footer-logo { font-size: 20px; font-weight: 900; color: white; }
+.footer-logo em { font-style: normal; color: var(--accent); }
+.footer-links { display: flex; gap: 28px; }
+.footer-links a { color: rgba(255,255,255,0.35); text-decoration: none; font-size: 13px; font-weight: 500; transition: color 0.2s; }
+.footer-links a:hover { color: white; }
+.footer-copy { font-size: 12px; color: rgba(255,255,255,0.25); font-weight: 500; }
+
+/* ANIMATIONS */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+.hero-tag { animation: fadeUp 0.6s ease 0.1s both; }
+.hero-title { animation: fadeUp 0.6s ease 0.2s both; }
+.hero-desc { animation: fadeUp 0.6s ease 0.3s both; }
+.hero-actions { animation: fadeUp 0.6s ease 0.4s both; }
+.hero-features { animation: fadeUp 0.6s ease 0.5s both; }
+.hero-right { animation: fadeUp 0.8s ease 0.3s both; }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="#" class="logo">Omn<em>ly</em></a>
+  <ul class="nav-links">
+    <li><a href="#how">Comment ça marche</a></li>
+    <li><a href="#features">Fonctionnalités</a></li>
+    <li><a href="#pricing">Tarifs</a></li>
+  </ul>
+  <a href="#" class="nav-cta">Essayer gratuitement</a>
+</nav>
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+
+  <div class="hero-left">
+    <div class="hero-tag">
+      <span class="tag-dot"></span>
+      Assistant business tout-en-un
+    </div>
+    <h1 class="hero-title">
+      Pilotez votre<br>commerce en<br><span class="serif">autopilot</span>
+    </h1>
+    <p class="hero-desc">Omnly automatise vos réseaux sociaux, vos mails, vos devis et vos avis clients. Vous gérez votre business, Omnly s'occupe du reste.</p>
+    <div class="hero-actions">
+      <a href="#pricing" class="btn-primary">Commencer gratuitement →</a>
+      <a href="#how" class="btn-secondary">Voir comment ça marche ↓</a>
+    </div>
+    <div class="hero-features">
+      <div class="hfeat"><span class="hfeat-icon">⚡</span> Résultats en 10 sec</div>
+      <div class="hfeat"><span class="hfeat-icon">🔒</span> Sans engagement</div>
+      <div class="hfeat"><span class="hfeat-icon">🇫🇷</span> 100% en français</div>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="features-mosaic">
+      <div class="feat-card">
+        <span class="feat-emoji">📱</span>
+        <div class="feat-title">Réseaux sociaux</div>
+        <div class="feat-desc">Légendes Instagram & TikTok générées en 10 secondes</div>
+        <span class="feat-badge">Populaire</span>
+      </div>
+      <div class="feat-card">
+        <span class="feat-emoji">📅</span>
+        <div class="feat-title">Posting auto</div>
+        <div class="feat-desc">Publication automatique sur tous vos réseaux</div>
+      </div>
+      <div class="feat-card">
+        <span class="feat-emoji">📧</span>
+        <div class="feat-title">Mails pro</div>
+        <div class="feat-desc">Rédaction automatique de vos emails professionnels</div>
+      </div>
+      <div class="feat-card">
+        <span class="feat-emoji">📄</span>
+        <div class="feat-title">Devis & factures</div>
+        <div class="feat-desc">Générez vos devis en quelques clics</div>
+      </div>
+      <div class="feat-card span-2">
+        <span class="feat-emoji">⭐</span>
+        <div class="feat-title">Avis Google & relance clients</div>
+        <div class="feat-desc">Répondez automatiquement à vos avis et relancez vos clients inactifs par SMS ou email</div>
+        <span class="feat-badge">Nouveau</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="marquee-section">
+  <div class="marquee-track">
+    <div class="marquee-item"><span class="marquee-dot"></span> Réseaux sociaux</div>
+    <div class="marquee-item"><span class="marquee-dot"></span> Posting automatique</div>
+    <div class="marquee-item"><span class="marquee-dot"></span> Mails professionnels</div>
+    <div class="marquee-item"><span class="marquee-dot"></span> Devis & factures</div>
+    <div class="marquee-item"><span class="marquee-dot"></span> Avis Google</div>
+    <div class="marquee-item"><span class="marquee-dot"></span> Relance clients</div>
+    <div class="marquee-item"><span class="marquee-dot"></span> Calendrier de contenu</div>
+    <div class="marquee-item"><span class="marquee-dot"></span> Scripts TikTok</div>
+    <div class="marquee-item"><span class="marquee-dot"></span> Réseaux sociaux</div>
+    <div class="marquee-item"><span class="marquee-dot"></span> Posting automatique</div>
+    <div class="marquee-item"><span class="marquee-dot"></span> Mails professionnels</div>
+    <div class="marquee-item"><span class="marquee-dot"></span> Devis & factures</div>
+    <div class="marquee-item"><span class="marquee-dot"></span> Avis Google</div>
+    <div class="marquee-item"><span class="marquee-dot"></span> Relance clients</div>
+  </div>
+</div>
+
+<section class="how" id="how">
+  <div class="section-header">
+    <div class="section-eyebrow">Comment ça marche</div>
+    <h2 class="section-title">Simple comme <span class="serif">bonjour</span></h2>
+  </div>
+  <div class="steps-grid">
+    <div class="step">
+      <div class="step-num">01</div>
+      <span class="step-icon">🏪</span>
+      <h3 class="step-title">Créez votre profil</h3>
+      <p class="step-desc">Entrez le nom et le type de votre commerce en 2 minutes. Omnly apprend à connaître votre activité.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <span class="step-icon">⚡</span>
+      <h3 class="step-title">Choisissez ce dont vous avez besoin</h3>
+      <p class="step-desc">Réseaux, mails, devis, avis Google — sélectionnez ce que vous voulez automatiser aujourd'hui.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <span class="step-icon">🚀</span>
+      <h3 class="step-title">Omnly fait tout</h3>
+      <p class="step-desc">En quelques secondes, tout est généré et prêt. Copiez, publiez, envoyez. C'est tout.</p>
+    </div>
+  </div>
+</section>
+
+<section class="features-deep" id="features">
+  <div class="section-header">
+    <div class="section-eyebrow">Fonctionnalités</div>
+    <h2 class="section-title">Tout ce dont votre<br>commerce a <span class="serif">besoin</span></h2>
+  </div>
+  <div class="features-list">
+
+    <div class="feature-row">
+      <div class="feature-content">
+        <span class="feature-icon-big">📱</span>
+        <h3 class="feature-title-big">Réseaux sociaux & Posting auto</h3>
+        <p class="feature-desc-big">Générez des légendes percutantes pour Instagram et TikTok en 10 secondes. Puis publiez automatiquement sur tous vos réseaux sans lever le petit doigt.</p>
+      </div>
+      <div class="feature-visual">
+        <div class="mock-card">
+          <span class="mock-icon">📸</span>
+          <span class="mock-text">Légende Instagram générée</span>
+          <span class="mock-badge green">✓ Publié</span>
+        </div>
+        <div class="mock-card">
+          <span class="mock-icon">🎵</span>
+          <span class="mock-text">Légende TikTok générée</span>
+          <span class="mock-badge green">✓ Publié</span>
+        </div>
+        <div class="mock-card">
+          <span class="mock-icon">#️⃣</span>
+          <span class="mock-text">15 hashtags optimisés</span>
+          <span class="mock-badge">Auto</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="feature-row">
+      <div class="feature-visual dark">
+        <div class="mock-card dark-card">
+          <span class="mock-icon">📧</span>
+          <span class="mock-text">Mail de relance client</span>
+          <span class="mock-badge">Envoyé</span>
+        </div>
+        <div class="mock-card dark-card">
+          <span class="mock-icon">📄</span>
+          <span class="mock-text">Devis #0042 généré</span>
+          <span class="mock-badge green">350€</span>
+        </div>
+        <div class="mock-card dark-card">
+          <span class="mock-icon">💬</span>
+          <span class="mock-text">SMS relance envoyé</span>
+          <span class="mock-badge green">✓</span>
+        </div>
+      </div>
+      <div class="feature-content">
+        <span class="feature-icon-big">📧</span>
+        <h3 class="feature-title-big">Mails, devis & relance clients</h3>
+        <p class="feature-desc-big">Rédigez vos emails professionnels en un clic, générez vos devis automatiquement, et relancez vos clients inactifs par SMS ou email sans y penser.</p>
+      </div>
+    </div>
+
+    <div class="feature-row">
+      <div class="feature-content">
+        <span class="feature-icon-big">⭐</span>
+        <h3 class="feature-title-big">Avis Google automatiques</h3>
+        <p class="feature-desc-big">Un client laisse un avis ? Omnly rédige une réponse personnalisée et professionnelle instantanément. Votre réputation en ligne s'améliore sans effort.</p>
+      </div>
+      <div class="feature-visual">
+        <div class="mock-card">
+          <span class="mock-icon">⭐</span>
+          <span class="mock-text">"Super restaurant !" — Marie L.</span>
+          <span class="mock-badge green">Répondu</span>
+        </div>
+        <div class="mock-card">
+          <span class="mock-icon">⭐</span>
+          <span class="mock-text">"Service impeccable" — Thomas</span>
+          <span class="mock-badge green">Répondu</span>
+        </div>
+        <div class="mock-card">
+          <span class="mock-icon">📊</span>
+          <span class="mock-text">Note Google : 4.9/5</span>
+          <span class="mock-badge">↑ +0.3</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section class="pricing" id="pricing">
+  <div class="section-header">
+    <div class="section-eyebrow">Tarifs</div>
+    <h2 class="section-title" style="color:white">Simple, <span class="serif" style="color:var(--accent2)">transparent</span></h2>
+  </div>
+  <div class="pricing-cards">
+    <div class="pricing-card">
+      <span class="card-icon">🌱</span>
+      <div class="card-name">Gratuit</div>
+      <div class="card-desc">Pour découvrir Omnly et tester ses fonctionnalités.</div>
+      <div class="card-price">
+        <div class="price"><sup>€</sup>0</div>
+        <div class="price-period">pour toujours</div>
+      </div>
+      <ul class="card-features">
+        <li><span class="check">✓</span> 3 générations gratuites</li>
+        <li><span class="check">✓</span> Légendes Instagram & TikTok</li>
+        <li><span class="check">✓</span> Hashtags inclus</li>
+      </ul>
+      <a href="#" class="card-btn btn-transparent">Commencer gratuitement</a>
+    </div>
+    <div class="pricing-card featured">
+      <div class="featured-badge">⭐ Populaire</div>
+      <span class="card-icon">🚀</span>
+      <div class="card-name">Pro</div>
+      <div class="card-desc">Tout ce qu'il faut pour piloter votre commerce en autopilot.</div>
+      <div class="card-price">
+        <div class="price"><sup>€</sup>19</div>
+        <div class="price-period">par mois · sans engagement</div>
+      </div>
+      <ul class="card-features">
+        <li><span class="check">✓</span> Tout illimité</li>
+        <li><span class="check">✓</span> Réseaux sociaux + Posting auto</li>
+        <li><span class="check">✓</span> Mails & devis automatiques</li>
+        <li><span class="check">✓</span> Avis Google automatiques</li>
+        <li><span class="check">✓</span> Relance clients SMS/email</li>
+        <li><span class="check">✓</span> Support 7j/7</li>
+      </ul>
+      <a href="#" class="card-btn btn-white">Démarrer — 7 jours gratuits</a>
+    </div>
+    <div class="pricing-card">
+      <span class="card-icon">🏢</span>
+      <div class="card-name">Business</div>
+      <div class="card-desc">Pour les agences et multi-commerces.</div>
+      <div class="card-price">
+        <div class="price"><sup>€</sup>49</div>
+        <div class="price-period">par mois · sans engagement</div>
+      </div>
+      <ul class="card-features">
+        <li><span class="check">✓</span> Tout le plan Pro</li>
+        <li><span class="check">✓</span> 5 commerces différents</li>
+        <li><span class="check">✓</span> Tableau de bord multi-comptes</li>
+        <li><span class="check">✓</span> Export PDF & rapports</li>
+        <li><span class="check">✓</span> Support prioritaire</li>
+      </ul>
+      <a href="#" class="card-btn btn-transparent">Commencer — 7 jours gratuits</a>
+    </div>
+  </div>
+</section>
+
+<section class="cta-section">
+  <h2 class="cta-title">Prêt à passer en<br><span class="serif">autopilot</span> ?</h2>
+  <p class="cta-desc">Rejoignez les commerces qui font confiance à Omnly pour leur business au quotidien.</p>
+  <a href="#" class="cta-btn">Commencer gratuitement →</a>
+  <p class="cta-note">7 jours gratuits · Aucune carte requise · Annulable à tout moment</p>
+</section>
+
+<footer>
+  <div class="footer-logo">Omn<em>ly</em></div>
+  <div class="footer-links">
+    <a href="#">Mentions légales</a>
+    <a href="#">CGU</a>
+    <a href="#">Contact</a>
+  </div>
+  <div class="footer-copy">© 2025 Omnly</div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Omnly — Connexion</title>
+<link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --black: #0A0A0A;
+  --white: #FAFAF8;
+  --cream: #F5F0E8;
+  --accent: #FF4D00;
+  --green: #10B981;
+  --border: rgba(10,10,10,0.08);
+  --muted: rgba(10,10,10,0.45);
+}
+body {
+  background: var(--white);
+  color: var(--black);
+  font-family: 'Cabinet Grotesk', sans-serif;
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+/* LEFT */
+.left {
+  background: var(--black);
+  padding: 56px;
+  display: flex; flex-direction: column;
+  justify-content: space-between;
+  position: relative; overflow: hidden;
+}
+.left-glow {
+  position: absolute; top: -120px; right: -120px;
+  width: 450px; height: 450px;
+  background: radial-gradient(circle, rgba(255,77,0,0.25) 0%, transparent 70%);
+  pointer-events: none;
+}
+.left-glow-2 {
+  position: absolute; bottom: -100px; left: -100px;
+  width: 350px; height: 350px;
+  background: radial-gradient(circle, rgba(255,184,0,0.1) 0%, transparent 70%);
+  pointer-events: none;
+}
+.left-logo {
+  font-size: 24px; font-weight: 900;
+  color: white; text-decoration: none; position: relative; z-index: 1;
+}
+.left-logo em { font-style: normal; color: var(--accent); }
+
+.left-content { position: relative; z-index: 1; }
+.left-title {
+  font-size: 52px; font-weight: 900; letter-spacing: -1.5px;
+  color: white; line-height: 1.05; margin-bottom: 20px;
+}
+.left-title .serif {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic; font-weight: 400; color: var(--accent);
+}
+.left-desc {
+  font-size: 16px; color: rgba(255,255,255,0.5);
+  line-height: 1.7; font-weight: 500; margin-bottom: 40px; max-width: 380px;
+}
+.left-features { display: flex; flex-direction: column; gap: 14px; }
+.left-feat {
+  display: flex; align-items: center; gap: 12px;
+  font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.7);
+}
+.feat-dot {
+  width: 28px; height: 28px; border-radius: 8px;
+  background: rgba(255,255,255,0.07);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; flex-shrink: 0;
+}
+
+.left-footer {
+  font-size: 12px; color: rgba(255,255,255,0.25);
+  font-weight: 500; position: relative; z-index: 1;
+}
+
+/* RIGHT */
+.right {
+  display: flex; align-items: center; justify-content: center;
+  padding: 56px 48px; background: var(--cream);
+}
+.auth-box { width: 100%; max-width: 400px; }
+
+/* TABS */
+.auth-tabs {
+  display: flex; background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 14px; padding: 4px; gap: 4px;
+  margin-bottom: 32px;
+}
+.auth-tab {
+  flex: 1; padding: 12px; border-radius: 10px; border: none;
+  background: transparent; cursor: pointer;
+  font-family: 'Cabinet Grotesk', sans-serif;
+  font-size: 14px; font-weight: 700; color: var(--muted);
+  transition: all 0.3s;
+}
+.auth-tab.active { background: var(--black); color: white; }
+
+/* MESSAGES */
+.msg {
+  padding: 12px 16px; border-radius: 10px;
+  font-size: 13px; font-weight: 600; margin-bottom: 16px; display: none;
+}
+.msg.show { display: block; }
+.msg.error { background: rgba(255,77,0,0.08); color: var(--accent); border: 1px solid rgba(255,77,0,0.2); }
+.msg.success { background: rgba(16,185,129,0.08); color: var(--green); border: 1px solid rgba(16,185,129,0.2); }
+
+/* FORM */
+.form-title { font-size: 30px; font-weight: 900; letter-spacing: -0.5px; margin-bottom: 6px; }
+.form-sub { font-size: 14px; color: var(--muted); font-weight: 500; margin-bottom: 28px; line-height: 1.5; }
+
+.google-btn {
+  width: 100%; padding: 14px 16px;
+  background: var(--white); border: 1.5px solid var(--border);
+  border-radius: 12px; font-family: 'Cabinet Grotesk', sans-serif;
+  font-size: 14px; font-weight: 700; color: var(--black);
+  cursor: pointer; display: flex; align-items: center;
+  justify-content: center; gap: 10px;
+  transition: all 0.3s; margin-bottom: 20px;
+}
+.google-btn:hover { border-color: var(--black); box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+
+.divider {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 20px;
+}
+.div-line { flex: 1; height: 1px; background: var(--border); }
+.div-text { font-size: 12px; color: var(--muted); font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+
+.form-group { margin-bottom: 14px; }
+.form-label { display: block; font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.input-wrap { position: relative; }
+.form-input {
+  width: 100%; padding: 13px 15px;
+  background: var(--white); border: 1.5px solid var(--border);
+  border-radius: 12px; font-family: 'Cabinet Grotesk', sans-serif;
+  font-size: 14px; font-weight: 500; color: var(--black); outline: none;
+  transition: all 0.2s;
+}
+.form-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(255,77,0,0.08); }
+.form-input.pr { padding-right: 44px; }
+.eye-btn {
+  position: absolute; right: 14px; top: 50%;
+  transform: translateY(-50%); background: none; border: none;
+  cursor: pointer; font-size: 16px; padding: 0;
+}
+
+/* STRENGTH */
+.strength { margin-top: 8px; }
+.strength-bar { height: 3px; background: var(--border); border-radius: 100px; overflow: hidden; margin-bottom: 4px; }
+.strength-fill { height: 100%; border-radius: 100px; width: 0; transition: all 0.3s; }
+.strength-label { font-size: 11px; font-weight: 700; }
+
+/* AVATAR */
+.avatar-wrap { margin-bottom: 16px; }
+.avatar-label { font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; display: block; }
+.avatar-grid { display: flex; gap: 8px; flex-wrap: wrap; }
+.av {
+  width: 42px; height: 42px; border-radius: 10px;
+  border: 2px solid var(--border); background: var(--white);
+  cursor: pointer; font-size: 20px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.av:hover { border-color: var(--accent); transform: scale(1.08); }
+.av.selected { border-color: var(--accent); background: rgba(255,77,0,0.06); transform: scale(1.08); }
+
+/* FORGOT */
+.forgot-row { text-align: right; margin-top: -6px; margin-bottom: 14px; }
+.forgot-link { font-size: 13px; font-weight: 700; color: var(--accent); text-decoration: none; }
+
+/* SUBMIT */
+.submit-btn {
+  width: 100%; padding: 16px; background: var(--black);
+  color: white; border: none; border-radius: 12px;
+  font-family: 'Cabinet Grotesk', sans-serif;
+  font-size: 15px; font-weight: 800; cursor: pointer;
+  transition: all 0.3s; margin-top: 6px;
+}
+.submit-btn:hover { background: var(--accent); transform: translateY(-2px); }
+.submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.terms {
+  font-size: 12px; color: var(--muted); text-align: center;
+  margin-top: 16px; line-height: 1.6; font-weight: 500;
+}
+.terms a { color: var(--black); font-weight: 700; text-decoration: none; }
+.terms a:hover { color: var(--accent); }
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  body { grid-template-columns: 1fr; }
+  .left { display: none; }
+  .right { padding: 40px 24px; }
+}
+</style>
+</head>
+<body>
+
+<!-- LEFT -->
+<div class="left">
+  <div class="left-glow"></div>
+  <div class="left-glow-2"></div>
+  <a href="omnly_landing.html" class="left-logo">Omn<em>ly</em></a>
+
+  <div class="left-content">
+    <h2 class="left-title">Votre commerce<br>en <span class="serif">autopilot</span></h2>
+    <p class="left-desc">Rejoignez les commerces qui automatisent leurs réseaux, mails, devis et avis clients avec Omnly.</p>
+    <div class="left-features">
+      <div class="left-feat"><div class="feat-dot">📱</div> Légendes Instagram & TikTok en 10 sec</div>
+      <div class="left-feat"><div class="feat-dot">📧</div> Mails & devis professionnels automatiques</div>
+      <div class="left-feat"><div class="feat-dot">⭐</div> Réponses aux avis Google automatiques</div>
+      <div class="left-feat"><div class="feat-dot">💬</div> Relance clients SMS & email</div>
+      <div class="left-feat"><div class="feat-dot">🔒</div> 3 essais gratuits — aucune carte requise</div>
+    </div>
+  </div>
+
+  <div class="left-footer">© 2025 Omnly · Tous droits réservés</div>
+</div>
+
+<!-- RIGHT -->
+<div class="right">
+  <div class="auth-box">
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="loginTab" onclick="switchTab('login')">Se connecter</button>
+      <button class="auth-tab" id="signupTab" onclick="switchTab('signup')">Créer un compte</button>
+    </div>
+
+    <div class="msg error" id="errorMsg"></div>
+    <div class="msg success" id="successMsg"></div>
+
+    <!-- LOGIN -->
+    <div id="loginForm">
+      <h2 class="form-title">Bon retour 👋</h2>
+      <p class="form-sub">Connectez-vous pour accéder à votre assistant business.</p>
+
+      <button class="google-btn" onclick="googleLogin()">
+        <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 0 0 2.38-5.88c0-.57-.05-.66-.15-1.18z"/><path fill="#34A853" d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2a4.8 4.8 0 0 1-7.18-2.54H1.83v2.07A8 8 0 0 0 8.98 17z"/><path fill="#FBBC05" d="M4.5 10.52a4.8 4.8 0 0 1 0-3.04V5.41H1.83a8 8 0 0 0 0 7.18l2.67-2.07z"/><path fill="#EA4335" d="M8.98 4.18c1.17 0 2.23.4 3.06 1.2l2.3-2.3A8 8 0 0 0 1.83 5.4L4.5 7.49a4.77 4.77 0 0 1 4.48-3.3z"/></svg>
+        Continuer avec Google
+      </button>
+
+      <div class="divider"><div class="div-line"></div><span class="div-text">ou</span><div class="div-line"></div></div>
+
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input class="form-input" type="email" id="loginEmail" placeholder="vous@exemple.fr">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Mot de passe</label>
+        <div class="input-wrap">
+          <input class="form-input pr" type="password" id="loginPwd" placeholder="••••••••">
+          <button class="eye-btn" onclick="toggleEye('loginPwd', this)">👁️</button>
+        </div>
+      </div>
+      <div class="forgot-row"><a href="#" class="forgot-link" onclick="showForgot()">Mot de passe oublié ?</a></div>
+
+      <button class="submit-btn" onclick="handleLogin()">Se connecter →</button>
+      <div class="terms">Pas de compte ? <a href="#" onclick="switchTab('signup')">Créer un compte gratuit</a></div>
+    </div>
+
+    <!-- SIGNUP -->
+    <div id="signupForm" style="display:none">
+      <h2 class="form-title">Créer un compte ✨</h2>
+      <p class="form-sub">3 essais gratuits inclus — aucune carte requise.</p>
+
+      <button class="google-btn" onclick="googleLogin()">
+        <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 0 0 2.38-5.88c0-.57-.05-.66-.15-1.18z"/><path fill="#34A853" d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2a4.8 4.8 0 0 1-7.18-2.54H1.83v2.07A8 8 0 0 0 8.98 17z"/><path fill="#FBBC05" d="M4.5 10.52a4.8 4.8 0 0 1 0-3.04V5.41H1.83a8 8 0 0 0 0 7.18l2.67-2.07z"/><path fill="#EA4335" d="M8.98 4.18c1.17 0 2.23.4 3.06 1.2l2.3-2.3A8 8 0 0 0 1.83 5.4L4.5 7.49a4.77 4.77 0 0 1 4.48-3.3z"/></svg>
+        Continuer avec Google
+      </button>
+
+      <div class="divider"><div class="div-line"></div><span class="div-text">ou</span><div class="div-line"></div></div>
+
+      <div class="avatar-wrap">
+        <span class="avatar-label">Choisissez un avatar</span>
+        <div class="avatar-grid">
+          <div class="av selected" onclick="selectAv(this)" data-av="🏪">🏪</div>
+          <div class="av" onclick="selectAv(this)" data-av="🍕">🍕</div>
+          <div class="av" onclick="selectAv(this)" data-av="✂️">✂️</div>
+          <div class="av" onclick="selectAv(this)" data-av="🥐">🥐</div>
+          <div class="av" onclick="selectAv(this)" data-av="👗">👗</div>
+          <div class="av" onclick="selectAv(this)" data-av="💪">💪</div>
+          <div class="av" onclick="selectAv(this)" data-av="💅">💅</div>
+          <div class="av" onclick="selectAv(this)" data-av="🔧">🔧</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Nom de votre commerce</label>
+        <input class="form-input" type="text" id="signupBusiness" placeholder="Ex: Pizzeria Bella Napoli">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input class="form-input" type="email" id="signupEmail" placeholder="vous@exemple.fr">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Mot de passe</label>
+        <div class="input-wrap">
+          <input class="form-input pr" type="password" id="signupPwd" placeholder="••••••••" oninput="checkStrength(this.value)">
+          <button class="eye-btn" onclick="toggleEye('signupPwd', this)">👁️</button>
+        </div>
+        <div class="strength">
+          <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+          <div class="strength-label" id="strengthLabel"></div>
+        </div>
+      </div>
+
+      <button class="submit-btn" onclick="handleSignup()">Créer mon compte gratuit →</button>
+      <div class="terms">En créant un compte vous acceptez nos <a href="#">CGU</a> et notre <a href="#">politique de confidentialité</a></div>
+    </div>
+
+    <!-- FORGOT -->
+    <div id="forgotForm" style="display:none">
+      <h2 class="form-title">Mot de passe oublié 🔑</h2>
+      <p class="form-sub">Entrez votre email pour recevoir un lien de réinitialisation.</p>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input class="form-input" type="email" id="forgotEmail" placeholder="vous@exemple.fr">
+      </div>
+      <button class="submit-btn" onclick="handleForgot()">Envoyer le lien →</button>
+      <div class="terms" style="margin-top:16px"><a href="#" onclick="showLogin()">← Retour à la connexion</a></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// STATE
+let selectedAv = '🏪';
+
+// TABS
+function switchTab(tab) {
+  const isLogin = tab === 'login';
+  document.getElementById('loginTab').classList.toggle('active', isLogin);
+  document.getElementById('signupTab').classList.toggle('active', !isLogin);
+  document.getElementById('loginForm').style.display = isLogin ? 'block' : 'none';
+  document.getElementById('signupForm').style.display = isLogin ? 'none' : 'block';
+  document.getElementById('forgotForm').style.display = 'none';
+  clearMsgs();
+}
+
+function showForgot() {
+  document.getElementById('loginForm').style.display = 'none';
+  document.getElementById('forgotForm').style.display = 'block';
+  clearMsgs();
+}
+function showLogin() {
+  document.getElementById('forgotForm').style.display = 'none';
+  document.getElementById('loginForm').style.display = 'block';
+  clearMsgs();
+}
+
+// MESSAGES
+function showError(msg) {
+  const el = document.getElementById('errorMsg');
+  el.textContent = '⚠️ ' + msg; el.classList.add('show');
+  document.getElementById('successMsg').classList.remove('show');
+}
+function showSuccess(msg) {
+  const el = document.getElementById('successMsg');
+  el.textContent = '✓ ' + msg; el.classList.add('show');
+  document.getElementById('errorMsg').classList.remove('show');
+}
+function clearMsgs() {
+  document.getElementById('errorMsg').classList.remove('show');
+  document.getElementById('successMsg').classList.remove('show');
+}
+
+// PASSWORD
+function toggleEye(id, btn) {
+  const inp = document.getElementById(id);
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+  btn.textContent = inp.type === 'password' ? '👁️' : '🙈';
+}
+
+function checkStrength(pwd) {
+  let s = 0;
+  if (pwd.length >= 8) s++;
+  if (/[A-Z]/.test(pwd)) s++;
+  if (/[0-9]/.test(pwd)) s++;
+  if (/[^A-Za-z0-9]/.test(pwd)) s++;
+  const cfgs = [
+    {w:'0%', c:'transparent', t:''},
+    {w:'25%', c:'#FF4D00', t:'Trop faible'},
+    {w:'50%', c:'#FFB800', t:'Faible'},
+    {w:'75%', c:'#F59E0B', t:'Moyen'},
+    {w:'100%', c:'#10B981', t:'Fort ✓'},
+  ];
+  const cfg = cfgs[s];
+  document.getElementById('strengthFill').style.width = cfg.w;
+  document.getElementById('strengthFill').style.background = cfg.c;
+  document.getElementById('strengthLabel').textContent = cfg.t;
+  document.getElementById('strengthLabel').style.color = cfg.c;
+}
+
+// AVATAR
+function selectAv(el) {
+  document.querySelectorAll('.av').forEach(a => a.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedAv = el.dataset.av;
+}
+
+// GOOGLE
+function googleLogin() {
+  showSuccess('Connexion Google réussie ! Redirection...');
+  setTimeout(() => redirect('Google User', 'google@exemple.fr'), 1200);
+}
+
+// LOGIN
+function handleLogin() {
+  clearMsgs();
+  const email = document.getElementById('loginEmail').value.trim();
+  const pwd = document.getElementById('loginPwd').value;
+  if (!email || !email.includes('@')) { showError('Email invalide.'); return; }
+  if (!pwd) { showError('Mot de passe requis.'); return; }
+  const users = JSON.parse(localStorage.getItem('omnly_users') || '{}');
+  const user = users[email];
+  if (!user) { showError('Aucun compte trouvé avec cet email.'); return; }
+  if (user.pwd !== btoa(pwd)) { showError('Mot de passe incorrect.'); return; }
+  showSuccess('Connexion réussie ! Redirection...');
+  setTimeout(() => redirect(user.business, email), 1000);
+}
+
+// SIGNUP
+function handleSignup() {
+  clearMsgs();
+  const business = document.getElementById('signupBusiness').value.trim();
+  const email = document.getElementById('signupEmail').value.trim();
+  const pwd = document.getElementById('signupPwd').value;
+  if (!business) { showError('Entrez le nom de votre commerce.'); return; }
+  if (!email || !email.includes('@')) { showError('Email invalide.'); return; }
+  if (!pwd || pwd.length < 6) { showError('Mot de passe trop court (6 caractères min).'); return; }
+  const users = JSON.parse(localStorage.getItem('omnly_users') || '{}');
+  if (users[email]) { showError('Un compte existe déjà avec cet email.'); return; }
+  users[email] = { business, pwd: btoa(pwd), avatar: selectedAv, createdAt: new Date().toISOString() };
+  localStorage.setItem('omnly_users', JSON.stringify(users));
+  showSuccess('Compte créé avec succès ! Redirection...');
+  setTimeout(() => redirect(business, email), 1200);
+}
+
+// FORGOT
+function handleForgot() {
+  clearMsgs();
+  const email = document.getElementById('forgotEmail').value.trim();
+  if (!email || !email.includes('@')) { showError('Email invalide.'); return; }
+  showSuccess('Email envoyé ! Vérifiez votre boîte mail.');
+}
+
+// REDIRECT
+function redirect(business, email) {
+  localStorage.setItem('omnly_user', JSON.stringify({ business, email, pro: false }));
+  localStorage.setItem('omnly_usage', '3');
+  window.location.href = 'omnly_generator.html';
+}
+
+// AUTO LOGIN
+if (localStorage.getItem('omnly_user') && !window.location.search.includes('logout')) {
+  window.location.href = 'omnly_generator.html';
+}
+</script>
+</body>
+</html>

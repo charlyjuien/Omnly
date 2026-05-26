@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Omnly — Générateur</title>
+<link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --black: #0A0A0A;
+  --white: #FAFAF8;
+  --cream: #F5F0E8;
+  --accent: #FF4D00;
+  --accent2: #FFB800;
+  --green: #10B981;
+  --border: rgba(10,10,10,0.08);
+  --muted: rgba(10,10,10,0.45);
+}
+body { background: var(--cream); color: var(--black); font-family: 'Cabinet Grotesk', sans-serif; min-height: 100vh; }
+
+/* NAV */
+nav {
+  position: fixed; top: 0; width: 100%; z-index: 100;
+  padding: 14px 48px;
+  display: flex; justify-content: space-between; align-items: center;
+  background: rgba(245,240,232,0.92); backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+.logo { font-size: 20px; font-weight: 900; text-decoration: none; color: var(--black); }
+.logo em { font-style: normal; color: var(--accent); }
+.nav-right { display: flex; align-items: center; gap: 14px; }
+.usage-pill {
+  background: var(--white); border: 1px solid var(--border);
+  padding: 6px 16px; border-radius: 100px;
+  font-size: 13px; font-weight: 600; color: var(--muted);
+}
+.usage-pill strong { color: var(--black); }
+.nav-pro {
+  background: var(--black); color: var(--white);
+  padding: 10px 22px; border-radius: 100px;
+  font-size: 13px; font-weight: 700; text-decoration: none;
+  transition: background 0.3s;
+}
+.nav-pro:hover { background: var(--accent); }
+
+/* LAYOUT */
+.app {
+  padding: 80px 0 0;
+  min-height: 100vh;
+  display: grid; grid-template-columns: 320px 1fr;
+}
+
+/* SIDEBAR */
+.sidebar {
+  background: var(--white); border-right: 1px solid var(--border);
+  padding: 28px 20px; position: sticky; top: 56px;
+  height: calc(100vh - 56px); overflow-y: auto;
+  display: flex; flex-direction: column; gap: 20px;
+}
+.sidebar-title { font-size: 11px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; padding: 0 8px; }
+
+/* TABS */
+.tabs { display: flex; flex-direction: column; gap: 4px; }
+.tab {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px; border-radius: 12px; cursor: pointer;
+  transition: all 0.2s; border: 1.5px solid transparent;
+  font-size: 14px; font-weight: 700; color: var(--muted);
+}
+.tab:hover { background: var(--cream); color: var(--black); }
+.tab.active { background: var(--black); color: var(--white); border-color: var(--black); }
+.tab-icon { font-size: 18px; flex-shrink: 0; }
+.tab-badge {
+  margin-left: auto; background: var(--accent); color: white;
+  padding: 2px 8px; border-radius: 100px; font-size: 10px; font-weight: 800;
+}
+
+/* FORM ELEMENTS */
+.form-section { display: flex; flex-direction: column; gap: 14px; }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-label { font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+.form-input, .form-select, .form-textarea {
+  width: 100%; padding: 12px 14px;
+  background: var(--cream); border: 1.5px solid transparent;
+  border-radius: 10px; font-family: 'Cabinet Grotesk', sans-serif;
+  font-size: 14px; font-weight: 500; color: var(--black); outline: none;
+  transition: all 0.2s;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); background: var(--white); }
+.form-textarea { resize: none; height: 80px; }
+
+/* GENERATE BTN */
+.gen-btn {
+  width: 100%; padding: 16px;
+  background: var(--accent); color: white; border: none;
+  border-radius: 12px; font-family: 'Cabinet Grotesk', sans-serif;
+  font-size: 15px; font-weight: 800; cursor: pointer;
+  transition: all 0.3s; position: relative;
+}
+.gen-btn:hover { background: #e63d00; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,77,0,0.3); }
+.gen-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.gen-btn .loading { display: none; }
+.gen-btn.is-loading .label { display: none; }
+.gen-btn.is-loading .loading { display: inline; }
+
+/* MAIN CONTENT */
+.main-content { padding: 32px; display: flex; flex-direction: column; gap: 20px; }
+
+/* EMPTY STATE */
+.empty {
+  background: var(--white); border-radius: 20px;
+  border: 2px dashed var(--border); padding: 80px 40px;
+  text-align: center; margin-top: 20px;
+}
+.empty-emoji { font-size: 56px; margin-bottom: 16px; }
+.empty-title { font-size: 22px; font-weight: 900; margin-bottom: 8px; }
+.empty-desc { font-size: 14px; color: var(--muted); font-weight: 500; line-height: 1.6; }
+
+/* RESULT CARDS */
+.result-section {
+  background: var(--white); border-radius: 20px;
+  border: 1px solid var(--border); overflow: hidden;
+  animation: fadeUp 0.4s ease forwards;
+}
+@keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+.result-header {
+  padding: 18px 24px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 12px;
+}
+.result-header-icon { font-size: 22px; }
+.result-header-title { font-size: 16px; font-weight: 800; }
+.result-header-badge {
+  margin-left: auto; padding: 4px 12px; border-radius: 100px;
+  font-size: 11px; font-weight: 800; letter-spacing: 0.5px;
+}
+.badge-ig { background: rgba(255,77,0,0.1); color: var(--accent); }
+.badge-tk { background: rgba(10,10,10,0.06); color: var(--black); }
+.badge-mail { background: rgba(16,185,129,0.1); color: var(--green); }
+.badge-devis { background: rgba(255,184,0,0.15); color: #B8860B; }
+.badge-avis { background: rgba(255,77,0,0.1); color: var(--accent); }
+.badge-relance { background: rgba(124,58,237,0.1); color: #7C3AED; }
+
+.result-items { padding: 20px 24px; display: flex; flex-direction: column; gap: 14px; }
+.result-item {
+  background: var(--cream); border-radius: 12px; padding: 16px 18px;
+  position: relative; border-left: 3px solid var(--accent);
+  transition: transform 0.2s;
+}
+.result-item:hover { transform: translateX(3px); }
+.result-item.green { border-left-color: var(--green); }
+.result-item.yellow { border-left-color: var(--accent2); }
+.result-item.purple { border-left-color: #7C3AED; }
+.result-item.dark { border-left-color: var(--black); }
+.result-label { font-size: 10px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.result-text { font-size: 14px; line-height: 1.7; color: var(--black); font-weight: 500; white-space: pre-wrap; }
+.copy-btn {
+  position: absolute; top: 12px; right: 12px;
+  background: var(--white); border: 1px solid var(--border);
+  padding: 4px 12px; border-radius: 8px; font-size: 11px;
+  font-weight: 700; cursor: pointer; font-family: 'Cabinet Grotesk', sans-serif;
+  transition: all 0.2s;
+}
+.copy-btn:hover { background: var(--black); color: var(--white); border-color: var(--black); }
+.copy-btn.copied { background: var(--green); color: white; border-color: var(--green); }
+
+/* SKELETON */
+.skeleton { background: var(--white); border-radius: 20px; border: 1px solid var(--border); padding: 24px; animation: shimmer 1.5s infinite; }
+@keyframes shimmer { 0%,100%{opacity:1} 50%{opacity:0.5} }
+.skel-bar { background: var(--cream); border-radius: 8px; margin-bottom: 10px; }
+
+/* LIMIT BANNER */
+.limit-banner {
+  background: var(--black); border-radius: 20px; padding: 40px;
+  text-align: center; animation: fadeUp 0.4s ease;
+}
+.limit-title { font-size: 24px; font-weight: 900; color: white; margin-bottom: 10px; }
+.limit-desc { font-size: 14px; color: rgba(255,255,255,0.55); margin-bottom: 28px; font-weight: 500; line-height: 1.6; }
+.limit-btn {
+  background: var(--accent); color: white; padding: 14px 36px;
+  border-radius: 100px; font-size: 15px; font-weight: 800;
+  text-decoration: none; display: inline-block; transition: all 0.3s;
+}
+.limit-btn:hover { background: #e63d00; transform: translateY(-2px); }
+
+/* PANEL SECTIONS */
+.panel-section { display: none; }
+.panel-section.active { display: flex; flex-direction: column; gap: 14px; }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="omnly_landing.html" class="logo">Omn<em>ly</em></a>
+  <div class="nav-right">
+    <div class="usage-pill">Générations : <strong id="usageCount">3</strong> / 3</div>
+    <a href="omnly_pricing.html" class="nav-pro">⚡ Passer Pro</a>
+  </div>
+</nav>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+    <!-- TABS -->
+    <div>
+      <div class="sidebar-title">Fonctionnalités</div>
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab('social')">
+          <span class="tab-icon">📱</span> Réseaux sociaux
+          <span class="tab-badge">Hot</span>
+        </div>
+        <div class="tab" onclick="switchTab('mail')">
+          <span class="tab-icon">📧</span> Mails pro
+        </div>
+        <div class="tab" onclick="switchTab('devis')">
+          <span class="tab-icon">📄</span> Devis & factures
+        </div>
+        <div class="tab" onclick="switchTab('avis')">
+          <span class="tab-icon">⭐</span> Avis Google
+        </div>
+        <div class="tab" onclick="switchTab('relance')">
+          <span class="tab-icon">💬</span> Relance clients
+        </div>
+      </div>
+    </div>
+
+    <!-- COMMERCE INFO (always visible) -->
+    <div class="form-section">
+      <div class="sidebar-title">Votre commerce</div>
+      <div class="form-group">
+        <label class="form-label">Nom du commerce</label>
+        <input class="form-input" type="text" id="businessName" placeholder="Ex: Pizzeria Bella Napoli">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Secteur</label>
+        <select class="form-select" id="sector">
+          <option value="Restaurant">🍕 Restaurant</option>
+          <option value="Coiffeur">✂️ Coiffeur</option>
+          <option value="Boulangerie">🥐 Boulangerie</option>
+          <option value="Boutique">👗 Boutique</option>
+          <option value="Café">☕ Café</option>
+          <option value="Sport">💪 Sport / Fitness</option>
+          <option value="Beauté">💅 Beauté / Spa</option>
+          <option value="Artisan">🔧 Artisan</option>
+          <option value="Autre">✨ Autre</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Ton</label>
+        <select class="form-select" id="tone">
+          <option value="Professionnel et chaleureux">Professionnel</option>
+          <option value="Décontracté et sympa">Décontracté</option>
+          <option value="Humoristique">Humoristique</option>
+          <option value="Premium et luxueux">Premium</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- DYNAMIC PANEL PER TAB -->
+
+    <!-- SOCIAL PANEL -->
+    <div class="panel-section active" id="panel-social">
+      <div class="sidebar-title">Options réseaux</div>
+      <div class="form-group">
+        <label class="form-label">Actualité / Info du jour</label>
+        <textarea class="form-textarea" id="socialInfo" placeholder="Ex: nouveau menu, promo du weekend..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Type de contenu</label>
+        <select class="form-select" id="socialType">
+          <option value="post classique">Post classique</option>
+          <option value="promotion">Promotion / Offre spéciale</option>
+          <option value="story">Idées de stories</option>
+          <option value="calendrier de la semaine">Calendrier semaine</option>
+          <option value="script vidéo TikTok">Script vidéo TikTok</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- MAIL PANEL -->
+    <div class="panel-section" id="panel-mail">
+      <div class="sidebar-title">Options mail</div>
+      <div class="form-group">
+        <label class="form-label">Objet du mail</label>
+        <select class="form-select" id="mailType">
+          <option value="confirmation de réservation">Confirmation réservation</option>
+          <option value="offre promotionnelle">Offre promotionnelle</option>
+          <option value="newsletter mensuelle">Newsletter mensuelle</option>
+          <option value="remerciement client">Remerciement client</option>
+          <option value="annonce nouveauté">Annonce nouveauté</option>
+          <option value="invitation événement">Invitation événement</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Détails supplémentaires</label>
+        <textarea class="form-textarea" id="mailInfo" placeholder="Ex: réduction de 20% ce weekend..."></textarea>
+      </div>
+    </div>
+
+    <!-- DEVIS PANEL -->
+    <div class="panel-section" id="panel-devis">
+      <div class="sidebar-title">Options devis</div>
+      <div class="form-group">
+        <label class="form-label">Nom du client</label>
+        <input class="form-input" type="text" id="clientName" placeholder="Ex: M. Dupont">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Prestation</label>
+        <textarea class="form-textarea" id="devisInfo" placeholder="Ex: création site vitrine 4 pages, livraison sous 2 semaines..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Montant estimé (€)</label>
+        <input class="form-input" type="number" id="devisAmount" placeholder="350">
+      </div>
+    </div>
+
+    <!-- AVIS PANEL -->
+    <div class="panel-section" id="panel-avis">
+      <div class="sidebar-title">Options avis Google</div>
+      <div class="form-group">
+        <label class="form-label">Avis du client</label>
+        <textarea class="form-textarea" id="avisText" placeholder="Ex: Super restaurant, accueil chaleureux et plats délicieux !"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Note donnée</label>
+        <select class="form-select" id="avisNote">
+          <option value="5 étoiles">⭐⭐⭐⭐⭐ 5 étoiles</option>
+          <option value="4 étoiles">⭐⭐⭐⭐ 4 étoiles</option>
+          <option value="3 étoiles">⭐⭐⭐ 3 étoiles</option>
+          <option value="2 étoiles">⭐⭐ 2 étoiles</option>
+          <option value="1 étoile">⭐ 1 étoile</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- RELANCE PANEL -->
+    <div class="panel-section" id="panel-relance">
+      <div class="sidebar-title">Options relance</div>
+      <div class="form-group">
+        <label class="form-label">Prénom du client</label>
+        <input class="form-input" type="text" id="relanceClient" placeholder="Ex: Marie">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Type de relance</label>
+        <select class="form-select" id="relanceType">
+          <option value="client inactif depuis 1 mois">Client inactif (1 mois)</option>
+          <option value="client inactif depuis 3 mois">Client inactif (3 mois)</option>
+          <option value="anniversaire du client">Anniversaire client</option>
+          <option value="offre exclusive client fidèle">Offre fidélité</option>
+          <option value="rappel rendez-vous">Rappel rendez-vous</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Canal</label>
+        <select class="form-select" id="relanceCanal">
+          <option value="SMS">📱 SMS</option>
+          <option value="email">📧 Email</option>
+          <option value="WhatsApp">💬 WhatsApp</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="gen-btn" id="genBtn" onclick="generate()">
+      <span class="label">✨ Générer</span>
+      <span class="loading">⏳ Génération...</span>
+    </button>
+
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-content" id="results">
+    <div class="empty" id="emptyState">
+      <div class="empty-emoji">✨</div>
+      <h3 class="empty-title">Prêt à générer !</h3>
+      <p class="empty-desc">Remplissez les informations de votre commerce, choisissez une fonctionnalité et cliquez sur Générer.</p>
+    </div>
+  </main>
+
+</div>
+
+<script>
+// ============ STATE ============
+let currentTab = 'social';
+let usageLeft = parseInt(localStorage.getItem('omnly_usage') || '3');
+const GEMINI_API_KEY = 'VOTRE_CLE_GEMINI_ICI';
+
+document.getElementById('usageCount').textContent = usageLeft;
+
+// ============ TABS ============
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  document.querySelectorAll('.panel-section').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + tab).classList.add('active');
+}
+
+// ============ COPY ============
+function copyText(btn, text) {
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✓ Copié !';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copier'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+// ============ BUILD PROMPT ============
+function buildPrompt() {
+  const name = document.getElementById('businessName').value.trim() || 'Mon commerce';
+  const sector = document.getElementById('sector').value;
+  const tone = document.getElementById('tone').value;
+
+  let prompt = '';
+
+  if (currentTab === 'social') {
+    const info = document.getElementById('socialInfo').value.trim();
+    const type = document.getElementById('socialType').value;
+    prompt = `Tu es un expert en marketing digital pour les commerces locaux français.
+Commerce: ${name} | Secteur: ${sector} | Ton: ${tone}
+${info ? 'Actualité: ' + info : ''}
+Génère du contenu de type "${type}" en JSON UNIQUEMENT sans markdown:
+{
+  "instagram": ["légende 1", "légende 2", "légende 3"],
+  "tiktok": ["légende 1", "légende 2", "légende 3"],
+  "hashtags": "#hashtag1 #hashtag2 #hashtag3 #hashtag4 #hashtag5 #hashtag6 #hashtag7 #hashtag8 #hashtag9 #hashtag10",
+  "calendrier": ["Lundi: idée", "Mardi: idée", "Mercredi: idée", "Jeudi: idée", "Vendredi: idée", "Samedi: idée", "Dimanche: idée"]
+}
+Contenu 100% français, engageant, avec emojis. Adapté au secteur ${sector}.`;
+
+  } else if (currentTab === 'mail') {
+    const mailType = document.getElementById('mailType').value;
+    const mailInfo = document.getElementById('mailInfo').value.trim();
+    prompt = `Tu es un expert en communication professionnelle pour les commerces locaux français.
+Commerce: ${name} | Secteur: ${sector} | Ton: ${tone}
+Génère un mail professionnel de type "${mailType}" ${mailInfo ? 'avec ces infos: ' + mailInfo : ''}.
+Réponds en JSON UNIQUEMENT sans markdown:
+{
+  "sujet": "Objet du mail",
+  "corps": "Corps complet du mail avec salutation, contenu et signature",
+  "objet_alternatif": "Autre proposition d'objet accrocheur"
+}`;
+
+  } else if (currentTab === 'devis') {
+    const client = document.getElementById('clientName').value.trim() || 'le client';
+    const devisInfo = document.getElementById('devisInfo').value.trim();
+    const amount = document.getElementById('devisAmount').value || '0';
+    prompt = `Tu es un expert en rédaction de devis professionnels pour les commerces français.
+Commerce: ${name} | Secteur: ${sector}
+Client: ${client} | Prestation: ${devisInfo} | Montant: ${amount}€
+Génère un devis complet en JSON UNIQUEMENT sans markdown:
+{
+  "titre": "Titre du devis",
+  "introduction": "Texte d'introduction professionnel",
+  "prestations": ["Prestation 1 — description — prix", "Prestation 2 — description — prix"],
+  "conditions": "Conditions de paiement et délais",
+  "conclusion": "Message de conclusion chaleureux",
+  "validite": "Durée de validité du devis"
+}`;
+
+  } else if (currentTab === 'avis') {
+    const avisText = document.getElementById('avisText').value.trim();
+    const note = document.getElementById('avisNote').value;
+    prompt = `Tu es un expert en gestion de réputation en ligne pour les commerces français.
+Commerce: ${name} | Secteur: ${sector} | Ton: ${tone}
+Avis client (${note}): "${avisText}"
+Génère des réponses professionnelles à cet avis en JSON UNIQUEMENT sans markdown:
+{
+  "reponse_courte": "Réponse courte et percutante (2-3 lignes)",
+  "reponse_complete": "Réponse complète et personnalisée (5-6 lignes)",
+  "reponse_alternative": "3ème option de réponse avec un angle différent"
+}
+Adapte le ton selon la note: positif si bonne note, diplomatique si mauvaise note.`;
+
+  } else if (currentTab === 'relance') {
+    const client = document.getElementById('relanceClient').value.trim() || 'le client';
+    const relanceType = document.getElementById('relanceType').value;
+    const canal = document.getElementById('relanceCanal').value;
+    prompt = `Tu es un expert en fidélisation client pour les commerces locaux français.
+Commerce: ${name} | Secteur: ${sector} | Ton: ${tone}
+Client: ${client} | Raison: ${relanceType} | Canal: ${canal}
+Génère des messages de relance adaptés au canal ${canal} en JSON UNIQUEMENT sans markdown:
+{
+  "message_1": "Premier message de relance (adapté à la longueur du canal)",
+  "message_2": "Deuxième message avec une autre approche",
+  "message_3": "Troisième message plus direct avec une offre"
+}
+${canal === 'SMS' ? 'SMS: maximum 160 caractères, percutant.' : ''}
+${canal === 'WhatsApp' ? 'WhatsApp: conversationnel, avec emojis.' : ''}
+${canal === 'email' ? 'Email: avec objet et corps complet.' : ''}`;
+  }
+
+  return prompt;
+}
+
+// ============ GENERATE ============
+async function generate() {
+  const name = document.getElementById('businessName').value.trim();
+  if (!name) {
+    document.getElementById('businessName').focus();
+    document.getElementById('businessName').style.borderColor = 'var(--accent)';
+    setTimeout(() => document.getElementById('businessName').style.borderColor = '', 2000);
+    return;
+  }
+
+  if (usageLeft <= 0) { showLimit(); return; }
+
+  const btn = document.getElementById('genBtn');
+  btn.classList.add('is-loading'); btn.disabled = true;
+  showSkeletons();
+
+  const prompt = buildPrompt();
+
+  try {
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.85, maxOutputTokens: 1500 }
+        })
+      }
+    );
+    const data = await response.json();
+    const text = data.candidates[0].content.parts[0].text.trim();
+    const clean = text.replace(/```json|```/g, '').trim();
+    const result = JSON.parse(clean);
+    usageLeft--;
+    localStorage.setItem('omnly_usage', usageLeft);
+    document.getElementById('usageCount').textContent = usageLeft;
+    showResults(result);
+  } catch(e) {
+    showError();
+  } finally {
+    btn.classList.remove('is-loading'); btn.disabled = false;
+  }
+}
+
+// ============ SHOW RESULTS ============
+function showResults(data) {
+  const results = document.getElementById('results');
+  results.innerHTML = '';
+
+  if (usageLeft <= 0) results.appendChild(createLimitBanner());
+
+  if (currentTab === 'social') {
+    if (data.instagram) results.appendChild(createSection('📸', 'Légendes Instagram', 'badge-ig', data.instagram.map((t,i) => ({label: `Post ${i+1}`, text: t, cls: ''})), 'Instagram'));
+    if (data.tiktok) results.appendChild(createSection('🎵', 'Légendes TikTok', 'badge-tk', data.tiktok.map((t,i) => ({label: `Post ${i+1}`, text: t, cls: 'dark'})), 'TikTok'));
+    if (data.hashtags) results.appendChild(createSection('#️⃣', 'Hashtags optimisés', 'badge-ig', [{label: 'Hashtags', text: data.hashtags, cls: ''}], 'Hashtags'));
+    if (data.calendrier) results.appendChild(createSection('📅', 'Calendrier de la semaine', 'badge-mail', data.calendrier.map((t,i) => ({label: t.split(':')[0], text: t.split(':').slice(1).join(':').trim(), cls: 'green'})), 'Calendrier'));
+
+  } else if (currentTab === 'mail') {
+    const items = [];
+    if (data.sujet) items.push({label: 'Objet', text: data.sujet, cls: 'green'});
+    if (data.corps) items.push({label: 'Corps du mail', text: data.corps, cls: ''});
+    if (data.objet_alternatif) items.push({label: 'Objet alternatif', text: data.objet_alternatif, cls: 'yellow'});
+    results.appendChild(createSection('📧', 'Mail professionnel', 'badge-mail', items, 'Mail'));
+
+  } else if (currentTab === 'devis') {
+    const items = [];
+    if (data.titre) items.push({label: 'Titre', text: data.titre, cls: 'yellow'});
+    if (data.introduction) items.push({label: 'Introduction', text: data.introduction, cls: ''});
+    if (data.prestations) items.push({label: 'Prestations', text: data.prestations.join('\n'), cls: 'green'});
+    if (data.conditions) items.push({label: 'Conditions', text: data.conditions, cls: ''});
+    if (data.conclusion) items.push({label: 'Conclusion', text: data.conclusion, cls: ''});
+    if (data.validite) items.push({label: 'Validité', text: data.validite, cls: 'yellow'});
+    results.appendChild(createSection('📄', 'Devis professionnel', 'badge-devis', items, 'Devis'));
+
+  } else if (currentTab === 'avis') {
+    const items = [];
+    if (data.reponse_courte) items.push({label: 'Réponse courte', text: data.reponse_courte, cls: ''});
+    if (data.reponse_complete) items.push({label: 'Réponse complète', text: data.reponse_complete, cls: 'green'});
+    if (data.reponse_alternative) items.push({label: 'Alternative', text: data.reponse_alternative, cls: 'yellow'});
+    results.appendChild(createSection('⭐', 'Réponses à l\'avis Google', 'badge-avis', items, 'Avis'));
+
+  } else if (currentTab === 'relance') {
+    const canal = document.getElementById('relanceCanal').value;
+    const items = [];
+    if (data.message_1) items.push({label: `${canal} 1`, text: data.message_1, cls: ''});
+    if (data.message_2) items.push({label: `${canal} 2`, text: data.message_2, cls: 'purple'});
+    if (data.message_3) items.push({label: `${canal} 3 — Offre`, text: data.message_3, cls: 'green'});
+    results.appendChild(createSection('💬', 'Messages de relance', 'badge-relance', items, 'Relance'));
+  }
+}
+
+function createSection(icon, title, badgeCls, items, badgeLabel) {
+  const section = document.createElement('div');
+  section.className = 'result-section';
+  section.innerHTML = `
+    <div class="result-header">
+      <span class="result-header-icon">${icon}</span>
+      <span class="result-header-title">${title}</span>
+      <span class="result-header-badge ${badgeCls}">${badgeLabel}</span>
+    </div>
+    <div class="result-items">
+      ${items.map(item => `
+        <div class="result-item ${item.cls}">
+          <div class="result-label">${item.label}</div>
+          <div class="result-text">${item.text}</div>
+          <button class="copy-btn" onclick="copyText(this, \`${item.text.replace(/`/g,"'")}\`)">Copier</button>
+        </div>
+      `).join('')}
+    </div>
+  `;
+  return section;
+}
+
+function showSkeletons() {
+  const results = document.getElementById('results');
+  results.innerHTML = '';
+  for(let i=0; i<3; i++) {
+    const sk = document.createElement('div');
+    sk.className = 'skeleton';
+    sk.innerHTML = `
+      <div class="skel-bar" style="height:16px;width:40%;margin-bottom:16px"></div>
+      <div class="skel-bar" style="height:12px;width:100%"></div>
+      <div class="skel-bar" style="height:12px;width:85%"></div>
+      <div class="skel-bar" style="height:12px;width:70%"></div>
+    `;
+    results.appendChild(sk);
+  }
+}
+
+function createLimitBanner() {
+  const div = document.createElement('div');
+  div.className = 'limit-banner';
+  div.innerHTML = `
+    <div class="limit-title">🚀 Générations gratuites épuisées !</div>
+    <div class="limit-desc">Passez à Omnly Pro pour des générations illimitées sur toutes les fonctionnalités.</div>
+    <a href="omnly_pricing.html" class="limit-btn">Passer Pro — 19€/mois →</a>
+  `;
+  return div;
+}
+
+function showLimit() {
+  document.getElementById('results').innerHTML = '';
+  document.getElementById('results').appendChild(createLimitBanner());
+}
+
+function showError() {
+  document.getElementById('results').innerHTML = `
+    <div class="empty">
+      <div class="empty-emoji">⚠️</div>
+      <h3 class="empty-title">Erreur de génération</h3>
+      <p class="empty-desc">Vérifiez votre clé API Gemini et réessayez.</p>
+    </div>
+  `;
+}
+</script>
+</body>
+</html>
