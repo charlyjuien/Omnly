@@ -198,14 +198,6 @@ nav {
   </div>
 </nav>
 
-    <h2 style="font-family:'Cabinet Grotesk',sans-serif;font-size:22px;font-weight:900;margin-bottom:8px;">Configurez votre clé API</h2>
-    <p style="font-size:14px;color:#666;margin-bottom:24px;line-height:1.6;">Entrez votre clé Groq pour activer le générateur. Elle sera sauvegardée localement.</p>
-    <input id="keyInput" type="text" placeholder="gsk_..." style="width:100%;padding:12px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;margin-bottom:16px;font-family:'Cabinet Grotesk',sans-serif;outline:none;">
-    <button onclick="saveKey()" style="width:100%;padding:14px;background:#FF4D00;color:white;border:none;border-radius:10px;font-size:15px;font-weight:800;cursor:pointer;font-family:'Cabinet Grotesk',sans-serif;">Activer le générateur →</button>
-    <p style="font-size:11px;color:#999;margin-top:12px;">Clé gratuite sur console.groq.com</p>
-  </div>
-</div>
-
 <div class="app">
 
   <!-- SIDEBAR -->
@@ -393,7 +385,6 @@ nav {
 let currentTab = 'social';
 let usageLeft = parseInt(localStorage.getItem('omnly_usage') || '3');
 
-
 document.getElementById('usageCount').textContent = usageLeft;
 
 // ============ TABS ============
@@ -524,18 +515,23 @@ async function generate() {
     const response = await fetch('https://omnly-api.fruodo3.workers.dev/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt })
+      body: JSON.stringify({
+        prompt,
+        model: 'llama-3.1-8b-instant'
+      })
     });
     const data = await response.json();
-    const text = data.choices[0].message.content.trim();
-    const clean = text.replace(/```json|```/g, '').trim();
+    if (data.error) throw new Error(data.error.message || 'Erreur API');
+    const content = data.choices?.[0]?.message?.content;
+    if (!content) throw new Error('Réponse invalide du serveur');
+    const clean = content.replace(/```json|```/g, '').trim();
     const result = JSON.parse(clean);
     usageLeft--;
     localStorage.setItem('omnly_usage', usageLeft);
     document.getElementById('usageCount').textContent = usageLeft;
     showResults(result);
   } catch(e) {
-    showError();
+    showError(e.message);
   } finally {
     btn.classList.remove('is-loading'); btn.disabled = false;
   }
@@ -642,16 +638,15 @@ function showLimit() {
   document.getElementById('results').appendChild(createLimitBanner());
 }
 
-function showError() {
+function showError(message) {
   document.getElementById('results').innerHTML = `
     <div class="empty">
       <div class="empty-emoji">⚠️</div>
       <h3 class="empty-title">Erreur de génération</h3>
-      <p class="empty-desc">Vérifiez votre clé API et réessayez.</p>
+      <p class="empty-desc">${message || 'Une erreur est survenue. Réessayez dans quelques instants.'}</p>
     </div>
   `;
 }
-
 </script>
 </body>
 </html>
