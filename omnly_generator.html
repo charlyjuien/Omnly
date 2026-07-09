@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Omnly — Générateur</title>
+<title>Omnly — Générateur IA</title>
 <link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -14,6 +14,7 @@
   --accent: #FF4D00;
   --accent2: #FFB800;
   --green: #10B981;
+  --purple: #7C3AED;
   --border: rgba(10,10,10,0.08);
   --muted: rgba(10,10,10,0.45);
 }
@@ -104,6 +105,15 @@ nav {
 .gen-btn.is-loading .label { display: none; }
 .gen-btn.is-loading .loading { display: inline; }
 
+/* RETRY BTN */
+.retry-btn {
+  background: transparent; border: 1.5px solid var(--border);
+  border-radius: 8px; padding: 6px 14px; font-size: 12px;
+  font-weight: 700; cursor: pointer; font-family: 'Cabinet Grotesk', sans-serif;
+  color: var(--muted); transition: all 0.2s; margin-top: 8px;
+}
+.retry-btn:hover { border-color: var(--accent); color: var(--accent); }
+
 /* MAIN CONTENT */
 .main-content { padding: 32px; display: flex; flex-direction: column; gap: 20px; }
 
@@ -139,7 +149,11 @@ nav {
 .badge-mail { background: rgba(16,185,129,0.1); color: var(--green); }
 .badge-devis { background: rgba(255,184,0,0.15); color: #B8860B; }
 .badge-avis { background: rgba(255,77,0,0.1); color: var(--accent); }
-.badge-relance { background: rgba(124,58,237,0.1); color: #7C3AED; }
+.badge-relance { background: rgba(124,58,237,0.1); color: var(--purple); }
+.badge-bio { background: rgba(16,185,129,0.1); color: var(--green); }
+.badge-script { background: rgba(10,10,10,0.06); color: var(--black); }
+.badge-pub { background: rgba(255,184,0,0.15); color: #B8860B; }
+.badge-faq { background: rgba(124,58,237,0.1); color: var(--purple); }
 
 .result-items { padding: 20px 24px; display: flex; flex-direction: column; gap: 14px; }
 .result-item {
@@ -150,7 +164,7 @@ nav {
 .result-item:hover { transform: translateX(3px); }
 .result-item.green { border-left-color: var(--green); }
 .result-item.yellow { border-left-color: var(--accent2); }
-.result-item.purple { border-left-color: #7C3AED; }
+.result-item.purple { border-left-color: var(--purple); }
 .result-item.dark { border-left-color: var(--black); }
 .result-label { font-size: 10px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
 .result-text { font-size: 14px; line-height: 1.7; color: var(--black); font-weight: 500; white-space: pre-wrap; }
@@ -183,9 +197,29 @@ nav {
 }
 .limit-btn:hover { background: #e63d00; transform: translateY(-2px); }
 
+/* ERROR BANNER */
+.error-banner {
+  background: var(--white); border-radius: 20px;
+  border: 1.5px solid rgba(255,77,0,0.2); padding: 40px;
+  text-align: center; animation: fadeUp 0.3s ease;
+}
+.error-emoji { font-size: 40px; margin-bottom: 12px; }
+.error-title { font-size: 18px; font-weight: 900; margin-bottom: 8px; }
+.error-desc { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 16px; }
+
 /* PANEL SECTIONS */
 .panel-section { display: none; }
 .panel-section.active { display: flex; flex-direction: column; gap: 14px; }
+
+/* TOAST */
+.toast {
+  position: fixed; bottom: 24px; right: 24px; z-index: 999;
+  background: var(--black); color: white; padding: 12px 20px;
+  border-radius: 12px; font-size: 13px; font-weight: 700;
+  animation: fadeUp 0.3s ease;
+  display: none;
+}
+.toast.show { display: block; }
 </style>
 </head>
 <body>
@@ -193,7 +227,7 @@ nav {
 <nav>
   <a href="omnly_landing.html" class="logo">Omn<em>ly</em></a>
   <div class="nav-right">
-    <div class="usage-pill">Générations : <strong id="usageCount">3</strong> / 3</div>
+    <div class="usage-pill">Générations restantes : <strong id="usageCount">3</strong></div>
     <a href="omnly_pricing.html" class="nav-pro">⚡ Passer Pro</a>
   </div>
 </nav>
@@ -207,30 +241,39 @@ nav {
     <div>
       <div class="sidebar-title">Fonctionnalités</div>
       <div class="tabs">
-        <div class="tab active" onclick="switchTab('social')">
+        <div class="tab active" onclick="switchTab('social', this)">
           <span class="tab-icon">📱</span> Réseaux sociaux
           <span class="tab-badge">Hot</span>
         </div>
-        <div class="tab" onclick="switchTab('mail')">
+        <div class="tab" onclick="switchTab('mail', this)">
           <span class="tab-icon">📧</span> Mails pro
         </div>
-        <div class="tab" onclick="switchTab('devis')">
+        <div class="tab" onclick="switchTab('relance', this)">
+          <span class="tab-icon">💬</span> Relance clients
+        </div>
+        <div class="tab" onclick="switchTab('devis', this)">
           <span class="tab-icon">📄</span> Devis & factures
         </div>
-        <div class="tab" onclick="switchTab('avis')">
+        <div class="tab" onclick="switchTab('avis', this)">
           <span class="tab-icon">⭐</span> Avis Google
         </div>
-        <div class="tab" onclick="switchTab('relance')">
-          <span class="tab-icon">💬</span> Relance clients
+        <div class="tab" onclick="switchTab('bio', this)">
+          <span class="tab-icon">✍️</span> Bio & Profil
+        </div>
+        <div class="tab" onclick="switchTab('pub', this)">
+          <span class="tab-icon">🎯</span> Pub & Promo
+        </div>
+        <div class="tab" onclick="switchTab('faq', this)">
+          <span class="tab-icon">❓</span> FAQ Client
         </div>
       </div>
     </div>
 
-    <!-- COMMERCE INFO (always visible) -->
+    <!-- COMMERCE INFO (toujours visible) -->
     <div class="form-section">
       <div class="sidebar-title">Votre commerce</div>
       <div class="form-group">
-        <label class="form-label">Nom du commerce</label>
+        <label class="form-label">Nom du commerce *</label>
         <input class="form-input" type="text" id="businessName" placeholder="Ex: Pizzeria Bella Napoli">
       </div>
       <div class="form-group">
@@ -239,33 +282,36 @@ nav {
           <option value="Restaurant">🍕 Restaurant</option>
           <option value="Coiffeur">✂️ Coiffeur</option>
           <option value="Boulangerie">🥐 Boulangerie</option>
-          <option value="Boutique">👗 Boutique</option>
+          <option value="Boutique mode">👗 Boutique mode</option>
           <option value="Café">☕ Café</option>
-          <option value="Sport">💪 Sport / Fitness</option>
-          <option value="Beauté">💅 Beauté / Spa</option>
+          <option value="Sport / Fitness">💪 Sport / Fitness</option>
+          <option value="Beauté / Spa">💅 Beauté / Spa</option>
           <option value="Artisan">🔧 Artisan</option>
+          <option value="Immobilier">🏠 Immobilier</option>
+          <option value="Santé / Bien-être">🌿 Santé / Bien-être</option>
+          <option value="Auto / Moto">🚗 Auto / Moto</option>
+          <option value="Informatique">💻 Informatique</option>
           <option value="Autre">✨ Autre</option>
         </select>
       </div>
       <div class="form-group">
-        <label class="form-label">Ton</label>
+        <label class="form-label">Ton de communication</label>
         <select class="form-select" id="tone">
           <option value="Professionnel et chaleureux">Professionnel</option>
           <option value="Décontracté et sympa">Décontracté</option>
-          <option value="Humoristique">Humoristique</option>
+          <option value="Humoristique et fun">Humoristique</option>
           <option value="Premium et luxueux">Premium</option>
+          <option value="Dynamique et jeune">Dynamique</option>
         </select>
       </div>
     </div>
-
-    <!-- DYNAMIC PANEL PER TAB -->
 
     <!-- SOCIAL PANEL -->
     <div class="panel-section active" id="panel-social">
       <div class="sidebar-title">Options réseaux</div>
       <div class="form-group">
         <label class="form-label">Actualité / Info du jour</label>
-        <textarea class="form-textarea" id="socialInfo" placeholder="Ex: nouveau menu, promo du weekend..."></textarea>
+        <textarea class="form-textarea" id="socialInfo" placeholder="Ex: nouveau menu, promo du weekend, événement..."></textarea>
       </div>
       <div class="form-group">
         <label class="form-label">Type de contenu</label>
@@ -275,6 +321,7 @@ nav {
           <option value="story">Idées de stories</option>
           <option value="calendrier de la semaine">Calendrier semaine</option>
           <option value="script vidéo TikTok">Script vidéo TikTok</option>
+          <option value="carrousel LinkedIn">Carrousel LinkedIn</option>
         </select>
       </div>
     </div>
@@ -283,7 +330,7 @@ nav {
     <div class="panel-section" id="panel-mail">
       <div class="sidebar-title">Options mail</div>
       <div class="form-group">
-        <label class="form-label">Objet du mail</label>
+        <label class="form-label">Type de mail</label>
         <select class="form-select" id="mailType">
           <option value="confirmation de réservation">Confirmation réservation</option>
           <option value="offre promotionnelle">Offre promotionnelle</option>
@@ -291,11 +338,47 @@ nav {
           <option value="remerciement client">Remerciement client</option>
           <option value="annonce nouveauté">Annonce nouveauté</option>
           <option value="invitation événement">Invitation événement</option>
+          <option value="mail de bienvenue nouveau client">Bienvenue nouveau client</option>
+          <option value="mail de suivi après achat">Suivi après achat</option>
         </select>
       </div>
       <div class="form-group">
         <label class="form-label">Détails supplémentaires</label>
-        <textarea class="form-textarea" id="mailInfo" placeholder="Ex: réduction de 20% ce weekend..."></textarea>
+        <textarea class="form-textarea" id="mailInfo" placeholder="Ex: réduction de 20% ce weekend, date de l'événement..."></textarea>
+      </div>
+    </div>
+
+    <!-- RELANCE PANEL -->
+    <div class="panel-section" id="panel-relance">
+      <div class="sidebar-title">Options relance</div>
+      <div class="form-group">
+        <label class="form-label">Prénom du client</label>
+        <input class="form-input" type="text" id="relanceClient" placeholder="Ex: Marie">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Type de relance</label>
+        <select class="form-select" id="relanceType">
+          <option value="client inactif depuis 1 mois">Client inactif (1 mois)</option>
+          <option value="client inactif depuis 3 mois">Client inactif (3 mois)</option>
+          <option value="panier abandonné">Panier abandonné</option>
+          <option value="anniversaire du client">Anniversaire client 🎂</option>
+          <option value="offre exclusive client fidèle">Offre fidélité VIP</option>
+          <option value="rappel rendez-vous">Rappel rendez-vous</option>
+          <option value="devis sans réponse">Devis sans réponse</option>
+          <option value="demande d'avis après achat">Demande d'avis</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Canal de communication</label>
+        <select class="form-select" id="relanceCanal">
+          <option value="SMS">📱 SMS</option>
+          <option value="email">📧 Email</option>
+          <option value="WhatsApp">💬 WhatsApp</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Offre éventuelle</label>
+        <input class="form-input" type="text" id="relanceOffre" placeholder="Ex: -10% avec le code RETOUR">
       </div>
     </div>
 
@@ -335,36 +418,69 @@ nav {
       </div>
     </div>
 
-    <!-- RELANCE PANEL -->
-    <div class="panel-section" id="panel-relance">
-      <div class="sidebar-title">Options relance</div>
+    <!-- BIO PANEL -->
+    <div class="panel-section" id="panel-bio">
+      <div class="sidebar-title">Options bio</div>
       <div class="form-group">
-        <label class="form-label">Prénom du client</label>
-        <input class="form-input" type="text" id="relanceClient" placeholder="Ex: Marie">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Type de relance</label>
-        <select class="form-select" id="relanceType">
-          <option value="client inactif depuis 1 mois">Client inactif (1 mois)</option>
-          <option value="client inactif depuis 3 mois">Client inactif (3 mois)</option>
-          <option value="anniversaire du client">Anniversaire client</option>
-          <option value="offre exclusive client fidèle">Offre fidélité</option>
-          <option value="rappel rendez-vous">Rappel rendez-vous</option>
+        <label class="form-label">Plateforme</label>
+        <select class="form-select" id="bioPlatform">
+          <option value="Instagram">Instagram</option>
+          <option value="TikTok">TikTok</option>
+          <option value="LinkedIn">LinkedIn</option>
+          <option value="Google Business">Google Business</option>
+          <option value="Facebook">Facebook</option>
         </select>
       </div>
       <div class="form-group">
-        <label class="form-label">Canal</label>
-        <select class="form-select" id="relanceCanal">
-          <option value="SMS">📱 SMS</option>
-          <option value="email">📧 Email</option>
-          <option value="WhatsApp">💬 WhatsApp</option>
+        <label class="form-label">Points forts à mettre en avant</label>
+        <textarea class="form-textarea" id="bioInfo" placeholder="Ex: ouvert 7j/7, livraison gratuite, fait maison..."></textarea>
+      </div>
+    </div>
+
+    <!-- PUB PANEL -->
+    <div class="panel-section" id="panel-pub">
+      <div class="sidebar-title">Options pub</div>
+      <div class="form-group">
+        <label class="form-label">Type de publicité</label>
+        <select class="form-select" id="pubType">
+          <option value="pub Facebook / Instagram">Pub Facebook / Instagram</option>
+          <option value="pub Google Ads">Pub Google Ads</option>
+          <option value="flyer promotionnel">Flyer promotionnel</option>
+          <option value="affiche vitrine">Affiche vitrine</option>
+          <option value="message promotionnel TikTok">Promo TikTok</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Offre / Promotion</label>
+        <textarea class="form-textarea" id="pubInfo" placeholder="Ex: -30% sur toute la carte ce weekend, Happy Hour 17h-19h..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Budget pub (€) — optionnel</label>
+        <input class="form-input" type="number" id="pubBudget" placeholder="50">
+      </div>
+    </div>
+
+    <!-- FAQ PANEL -->
+    <div class="panel-section" id="panel-faq">
+      <div class="sidebar-title">Options FAQ</div>
+      <div class="form-group">
+        <label class="form-label">Questions fréquentes de vos clients</label>
+        <textarea class="form-textarea" id="faqInfo" placeholder="Ex: horaires, livraison, parking, réservation, paiement..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Où utiliser cette FAQ ?</label>
+        <select class="form-select" id="faqUsage">
+          <option value="site web">Site web</option>
+          <option value="Google Business">Google Business</option>
+          <option value="réseaux sociaux">Réseaux sociaux</option>
+          <option value="email automatique">Email automatique</option>
         </select>
       </div>
     </div>
 
     <button class="gen-btn" id="genBtn" onclick="generate()">
       <span class="label">✨ Générer</span>
-      <span class="loading">⏳ Génération...</span>
+      <span class="loading">⏳ Génération en cours...</span>
     </button>
 
   </aside>
@@ -380,20 +496,24 @@ nav {
 
 </div>
 
+<div class="toast" id="toast"></div>
+
 <script>
 // ============ STATE ============
 let currentTab = 'social';
-let usageLeft = parseInt(localStorage.getItem('omnly_usage') || '999');
+let usageLeft = parseInt(localStorage.getItem('omnly_usage') ?? '3');
+if (isNaN(usageLeft)) usageLeft = 3;
 
 document.getElementById('usageCount').textContent = usageLeft;
 
 // ============ TABS ============
-function switchTab(tab) {
+function switchTab(tab, el) {
   currentTab = tab;
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  event.currentTarget.classList.add('active');
+  el.classList.add('active');
   document.querySelectorAll('.panel-section').forEach(p => p.classList.remove('active'));
   document.getElementById('panel-' + tab).classList.add('active');
+  document.getElementById('results').innerHTML = '<div class="empty"><div class="empty-emoji">✨</div><h3 class="empty-title">Prêt à générer !</h3><p class="empty-desc">Remplissez les informations et cliquez sur Générer.</p></div>';
 }
 
 // ============ COPY ============
@@ -405,92 +525,154 @@ function copyText(btn, text) {
   });
 }
 
+// ============ TOAST ============
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
 // ============ BUILD PROMPT ============
 function buildPrompt() {
   const name = document.getElementById('businessName').value.trim() || 'Mon commerce';
   const sector = document.getElementById('sector').value;
   const tone = document.getElementById('tone').value;
 
-  let prompt = '';
-
   if (currentTab === 'social') {
     const info = document.getElementById('socialInfo').value.trim();
     const type = document.getElementById('socialType').value;
-    prompt = `Tu es un expert en marketing digital pour les commerces locaux français.
+
+    if (type === 'calendrier de la semaine') {
+      return `Tu es un expert en marketing digital pour les commerces locaux français.
+Commerce: ${name} | Secteur: ${sector} | Ton: ${tone}
+${info ? 'Contexte: ' + info : ''}
+Génère un calendrier éditorial pour la semaine en JSON UNIQUEMENT, sans texte avant ni après, sans markdown:
+{"calendrier":["Lundi: idée de post","Mardi: idée de post","Mercredi: idée de post","Jeudi: idée de post","Vendredi: idée de post","Samedi: idée de post","Dimanche: idée de post"]}`;
+    }
+
+    if (type === 'story') {
+      return `Tu es un expert en marketing digital pour les commerces locaux français.
+Commerce: ${name} | Secteur: ${sector} | Ton: ${tone}
+${info ? 'Contexte: ' + info : ''}
+Génère 5 idées de stories en JSON UNIQUEMENT, sans texte avant ni après, sans markdown:
+{"stories":["Idée story 1","Idée story 2","Idée story 3","Idée story 4","Idée story 5"]}`;
+    }
+
+    if (type === 'script vidéo TikTok') {
+      return `Tu es un expert en marketing digital pour les commerces locaux français.
+Commerce: ${name} | Secteur: ${sector} | Ton: ${tone}
+${info ? 'Contexte: ' + info : ''}
+Génère un script vidéo TikTok en JSON UNIQUEMENT, sans texte avant ni après, sans markdown:
+{"script_hook":"Accroche des 3 premières secondes","script_corps":"Corps de la vidéo (15-30 sec)","script_cta":"Call to action final","hashtags":"#hashtag1 #hashtag2 #hashtag3 #hashtag4 #hashtag5"}`;
+    }
+
+    if (type === 'carrousel LinkedIn') {
+      return `Tu es un expert en marketing digital pour les commerces locaux français.
+Commerce: ${name} | Secteur: ${sector} | Ton: ${tone}
+${info ? 'Contexte: ' + info : ''}
+Génère un carrousel LinkedIn en JSON UNIQUEMENT, sans texte avant ni après, sans markdown:
+{"slide_1":"Titre accrocheur slide 1","slide_2":"Contenu slide 2","slide_3":"Contenu slide 3","slide_4":"Contenu slide 4","slide_5":"Call to action final","legende":"Légende du post LinkedIn"}`;
+    }
+
+    return `Tu es un expert en marketing digital pour les commerces locaux français.
 Commerce: ${name} | Secteur: ${sector} | Ton: ${tone}
 ${info ? 'Actualité: ' + info : ''}
-Génère du contenu de type "${type}" en JSON UNIQUEMENT sans markdown:
-{
-  "instagram": ["légende 1", "légende 2", "légende 3"],
-  "tiktok": ["légende 1", "légende 2", "légende 3"],
-  "hashtags": "#hashtag1 #hashtag2 #hashtag3 #hashtag4 #hashtag5 #hashtag6 #hashtag7 #hashtag8 #hashtag9 #hashtag10",
-  "calendrier": ["Lundi: idée", "Mardi: idée", "Mercredi: idée", "Jeudi: idée", "Vendredi: idée", "Samedi: idée", "Dimanche: idée"]
-}
-Contenu 100% français, engageant, avec emojis. Adapté au secteur ${sector}.`;
+Génère du contenu "${type}" en JSON UNIQUEMENT, sans texte avant ni après, sans markdown:
+{"instagram":["légende 1 avec emojis","légende 2 avec emojis","légende 3 avec emojis"],"tiktok":["légende 1","légende 2","légende 3"],"hashtags":"#hashtag1 #hashtag2 #hashtag3 #hashtag4 #hashtag5 #hashtag6 #hashtag7 #hashtag8 #hashtag9 #hashtag10"}`;
 
   } else if (currentTab === 'mail') {
     const mailType = document.getElementById('mailType').value;
     const mailInfo = document.getElementById('mailInfo').value.trim();
-    prompt = `Tu es un expert en communication professionnelle pour les commerces locaux français.
+    return `Tu es un expert en communication pour les commerces français.
 Commerce: ${name} | Secteur: ${sector} | Ton: ${tone}
-Génère un mail professionnel de type "${mailType}" ${mailInfo ? 'avec ces infos: ' + mailInfo : ''}.
-Réponds en JSON UNIQUEMENT sans markdown:
-{
-  "sujet": "Objet du mail",
-  "corps": "Corps complet du mail avec salutation, contenu et signature",
-  "objet_alternatif": "Autre proposition d'objet accrocheur"
-}`;
+Génère un mail "${mailType}" ${mailInfo ? 'avec ces infos: ' + mailInfo : ''}.
+Réponds en JSON UNIQUEMENT, sans texte avant ni après, sans markdown:
+{"sujet":"Objet du mail","corps":"Corps complet du mail","objet_alternatif":"Autre objet accrocheur"}`;
+
+  } else if (currentTab === 'relance') {
+    const client = document.getElementById('relanceClient').value.trim() || 'cher(e) client(e)';
+    const relanceType = document.getElementById('relanceType').value;
+    const canal = document.getElementById('relanceCanal').value;
+    const offre = document.getElementById('relanceOffre').value.trim();
+    return `Tu es un expert en fidélisation client pour les commerces locaux français.
+Commerce: ${name} | Secteur: ${sector} | Ton: ${tone}
+Client: ${client} | Raison: ${relanceType} | Canal: ${canal}${offre ? ' | Offre: ' + offre : ''}
+Génère 3 messages de relance pour ${canal} en JSON UNIQUEMENT, sans texte avant ni après, sans markdown:
+{"message_1":"Premier message de relance","message_2":"Deuxième message avec autre approche","message_3":"Troisième message plus direct${offre ? ' avec l offre' : ''}"}
+${canal === 'SMS' ? 'IMPORTANT: SMS maximum 160 caractères chacun.' : ''}
+${canal === 'WhatsApp' ? 'IMPORTANT: ton conversationnel, utilise des emojis.' : ''}
+${canal === 'email' ? 'IMPORTANT: inclure un objet et un corps de mail complet.' : ''}`;
 
   } else if (currentTab === 'devis') {
     const client = document.getElementById('clientName').value.trim() || 'le client';
     const devisInfo = document.getElementById('devisInfo').value.trim();
     const amount = document.getElementById('devisAmount').value || '0';
-    prompt = `Tu es un expert en rédaction de devis professionnels pour les commerces français.
+    return `Tu es un expert en rédaction de devis pour les commerces français.
 Commerce: ${name} | Secteur: ${sector}
 Client: ${client} | Prestation: ${devisInfo} | Montant: ${amount}€
-Génère un devis complet en JSON UNIQUEMENT sans markdown:
-{
-  "titre": "Titre du devis",
-  "introduction": "Texte d'introduction professionnel",
-  "prestations": ["Prestation 1 — description — prix", "Prestation 2 — description — prix"],
-  "conditions": "Conditions de paiement et délais",
-  "conclusion": "Message de conclusion chaleureux",
-  "validite": "Durée de validité du devis"
-}`;
+Génère un devis complet en JSON UNIQUEMENT, sans texte avant ni après, sans markdown:
+{"titre":"Titre du devis","introduction":"Texte intro professionnel","prestations":["Prestation 1 — description — prix","Prestation 2 — description — prix"],"conditions":"Conditions de paiement","conclusion":"Message de conclusion","validite":"Durée de validité"}`;
 
   } else if (currentTab === 'avis') {
-    const avisText = document.getElementById('avisText').value.trim();
+    const avisText = document.getElementById('avisText').value.trim() || 'Bon service';
     const note = document.getElementById('avisNote').value;
-    prompt = `Tu es un expert en gestion de réputation en ligne pour les commerces français.
+    return `Tu es un expert en gestion de réputation pour les commerces français.
 Commerce: ${name} | Secteur: ${sector} | Ton: ${tone}
 Avis client (${note}): "${avisText}"
-Génère des réponses professionnelles à cet avis en JSON UNIQUEMENT sans markdown:
-{
-  "reponse_courte": "Réponse courte et percutante (2-3 lignes)",
-  "reponse_complete": "Réponse complète et personnalisée (5-6 lignes)",
-  "reponse_alternative": "3ème option de réponse avec un angle différent"
-}
-Adapte le ton selon la note: positif si bonne note, diplomatique si mauvaise note.`;
+Génère 3 réponses professionnelles en JSON UNIQUEMENT, sans texte avant ni après, sans markdown:
+{"reponse_courte":"Réponse courte 2-3 lignes","reponse_complete":"Réponse complète 5-6 lignes","reponse_alternative":"3ème option avec angle différent"}`;
 
-  } else if (currentTab === 'relance') {
-    const client = document.getElementById('relanceClient').value.trim() || 'le client';
-    const relanceType = document.getElementById('relanceType').value;
-    const canal = document.getElementById('relanceCanal').value;
-    prompt = `Tu es un expert en fidélisation client pour les commerces locaux français.
+  } else if (currentTab === 'bio') {
+    const platform = document.getElementById('bioPlatform').value;
+    const bioInfo = document.getElementById('bioInfo').value.trim();
+    return `Tu es un expert en personal branding pour les commerces français.
+Commerce: ${name} | Secteur: ${sector} | Ton: ${tone} | Plateforme: ${platform}
+${bioInfo ? 'Points forts: ' + bioInfo : ''}
+Génère des bios optimisées en JSON UNIQUEMENT, sans texte avant ni après, sans markdown:
+{"bio_courte":"Bio courte percutante (moins de 100 caractères)","bio_complete":"Bio complète optimisée pour ${platform}","bio_alternative":"3ème version avec angle différent","cta":"Call to action à ajouter"}`;
+
+  } else if (currentTab === 'pub') {
+    const pubType = document.getElementById('pubType').value;
+    const pubInfo = document.getElementById('pubInfo').value.trim();
+    const budget = document.getElementById('pubBudget').value;
+    return `Tu es un expert en publicité digitale pour les commerces français.
 Commerce: ${name} | Secteur: ${sector} | Ton: ${tone}
-Client: ${client} | Raison: ${relanceType} | Canal: ${canal}
-Génère des messages de relance adaptés au canal ${canal} en JSON UNIQUEMENT sans markdown:
-{
-  "message_1": "Premier message de relance (adapté à la longueur du canal)",
-  "message_2": "Deuxième message avec une autre approche",
-  "message_3": "Troisième message plus direct avec une offre"
-}
-${canal === 'SMS' ? 'SMS: maximum 160 caractères, percutant.' : ''}
-${canal === 'WhatsApp' ? 'WhatsApp: conversationnel, avec emojis.' : ''}
-${canal === 'email' ? 'Email: avec objet et corps complet.' : ''}`;
+Type: ${pubType} | ${pubInfo ? 'Offre: ' + pubInfo : ''} ${budget ? '| Budget: ' + budget + '€' : ''}
+Génère des textes publicitaires en JSON UNIQUEMENT, sans texte avant ni après, sans markdown:
+{"accroche":"Titre accrocheur (max 40 caractères)","texte_principal":"Texte principal de la pub","description":"Description courte","cta":"Bouton call to action","variante_1":"Variante A/B test","variante_2":"Autre variante"}`;
+
+  } else if (currentTab === 'faq') {
+    const faqInfo = document.getElementById('faqInfo').value.trim();
+    const usage = document.getElementById('faqUsage').value;
+    return `Tu es un expert en communication client pour les commerces français.
+Commerce: ${name} | Secteur: ${sector} | Usage: ${usage}
+${faqInfo ? 'Sujets de questions: ' + faqInfo : 'Génère des questions fréquentes typiques du secteur ' + sector}
+Génère une FAQ complète en JSON UNIQUEMENT, sans texte avant ni après, sans markdown:
+{"faq":[{"question":"Question 1","reponse":"Réponse 1"},{"question":"Question 2","reponse":"Réponse 2"},{"question":"Question 3","reponse":"Réponse 3"},{"question":"Question 4","reponse":"Réponse 4"},{"question":"Question 5","reponse":"Réponse 5"}]}`;
   }
 
-  return prompt;
+  return '';
+}
+
+// ============ PARSE RESPONSE ============
+function parseResponse(content) {
+  // Nettoyer les balises markdown
+  let clean = content
+    .replace(/```json\s*/gi, '')
+    .replace(/```\s*/g, '')
+    .trim();
+
+  // Extraire le JSON si entouré de texte
+  const match = clean.match(/\{[\s\S]*\}/);
+  if (match) clean = match[0];
+
+  try {
+    return JSON.parse(clean);
+  } catch(e) {
+    // Si c'est du texte brut, on le wrap
+    return { texte_brut: content };
+  }
 }
 
 // ============ GENERATE ============
@@ -500,6 +682,7 @@ async function generate() {
     document.getElementById('businessName').focus();
     document.getElementById('businessName').style.borderColor = 'var(--accent)';
     setTimeout(() => document.getElementById('businessName').style.borderColor = '', 2000);
+    showToast('⚠️ Entrez le nom de votre commerce !');
     return;
   }
 
@@ -515,23 +698,41 @@ async function generate() {
     const response = await fetch('https://omnly-api.fruodo3.workers.dev/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        prompt,
-        model: 'llama-3.1-8b-instant'
-      })
+      body: JSON.stringify({ prompt, model: 'llama-3.1-8b-instant' })
     });
+
     const data = await response.json();
-    if (data.error) throw new Error(data.error.message || 'Erreur API');
+
+    if (data.error) {
+      // Gestion rate limit
+      if (data.error.code === 'rate_limit_exceeded' || (data.error.message && data.error.message.includes('Rate limit'))) {
+        throw new Error('rate_limit');
+      }
+      throw new Error(data.error.message || 'Erreur API');
+    }
+
     const content = data.choices?.[0]?.message?.content;
-    if (!content) throw new Error('Réponse invalide du serveur');
-    const clean = content.replace(/```json|```/g, '').trim();
-    const result = JSON.parse(clean);
+    if (!content) throw new Error('Réponse vide du serveur');
+
+    const result = parseResponse(content);
+
     usageLeft--;
     localStorage.setItem('omnly_usage', usageLeft);
     document.getElementById('usageCount').textContent = usageLeft;
+
     showResults(result);
+
   } catch(e) {
-    showError(e.message);
+    if (e.message === 'rate_limit') {
+      showErrorBanner(
+        '⏱️',
+        'Limite atteinte — réessayez dans 10 secondes',
+        'Le service IA est très sollicité en ce moment. Attendez quelques secondes et réessayez.',
+        true
+      );
+    } else {
+      showErrorBanner('⚠️', 'Erreur de génération', e.message || 'Une erreur est survenue.', true);
+    }
   } finally {
     btn.classList.remove('is-loading'); btn.disabled = false;
   }
@@ -542,51 +743,97 @@ function showResults(data) {
   const results = document.getElementById('results');
   results.innerHTML = '';
 
-  if (usageLeft <= 0) results.appendChild(createLimitBanner());
-
   if (currentTab === 'social') {
-    if (data.instagram) results.appendChild(createSection('📸', 'Légendes Instagram', 'badge-ig', data.instagram.map((t,i) => ({label: `Post ${i+1}`, text: t, cls: ''})), 'Instagram'));
-    if (data.tiktok) results.appendChild(createSection('🎵', 'Légendes TikTok', 'badge-tk', data.tiktok.map((t,i) => ({label: `Post ${i+1}`, text: t, cls: 'dark'})), 'TikTok'));
-    if (data.hashtags) results.appendChild(createSection('#️⃣', 'Hashtags optimisés', 'badge-ig', [{label: 'Hashtags', text: data.hashtags, cls: ''}], 'Hashtags'));
-    if (data.calendrier) results.appendChild(createSection('📅', 'Calendrier de la semaine', 'badge-mail', data.calendrier.map((t,i) => ({label: t.split(':')[0], text: t.split(':').slice(1).join(':').trim(), cls: 'green'})), 'Calendrier'));
+    if (data.instagram) results.appendChild(createSection('📸', 'Légendes Instagram', 'badge-ig', data.instagram.map((t,i) => ({label: `Version ${i+1}`, text: t, cls: ''})), 'Instagram'));
+    if (data.tiktok) results.appendChild(createSection('🎵', 'Légendes TikTok', 'badge-tk', data.tiktok.map((t,i) => ({label: `Version ${i+1}`, text: t, cls: 'dark'})), 'TikTok'));
+    if (data.hashtags) results.appendChild(createSection('#️⃣', 'Hashtags optimisés', 'badge-ig', [{label: 'À copier', text: data.hashtags, cls: ''}], 'Hashtags'));
+    if (data.calendrier) results.appendChild(createSection('📅', 'Calendrier de la semaine', 'badge-mail', data.calendrier.map(t => ({label: t.split(':')[0], text: t.split(':').slice(1).join(':').trim(), cls: 'green'})), 'Calendrier'));
+    if (data.stories) results.appendChild(createSection('📲', 'Idées de stories', 'badge-ig', data.stories.map((t,i) => ({label: `Story ${i+1}`, text: t, cls: ''})), 'Stories'));
+    if (data.script_hook) {
+      results.appendChild(createSection('🎬', 'Script TikTok', 'badge-tk', [
+        {label: '🔥 Accroche (3 sec)', text: data.script_hook, cls: ''},
+        {label: '📹 Corps de la vidéo', text: data.script_corps, cls: 'dark'},
+        {label: '👉 Call to action', text: data.script_cta, cls: 'green'},
+        {label: '#️⃣ Hashtags', text: data.hashtags || '', cls: ''}
+      ], 'Script'));
+    }
+    if (data.slide_1) {
+      results.appendChild(createSection('📊', 'Carrousel LinkedIn', 'badge-script', [
+        {label: 'Slide 1 — Accroche', text: data.slide_1, cls: ''},
+        {label: 'Slide 2', text: data.slide_2, cls: 'dark'},
+        {label: 'Slide 3', text: data.slide_3, cls: 'dark'},
+        {label: 'Slide 4', text: data.slide_4, cls: 'dark'},
+        {label: 'Slide 5 — CTA', text: data.slide_5, cls: 'green'},
+        {label: 'Légende du post', text: data.legende, cls: 'yellow'}
+      ], 'LinkedIn'));
+    }
+    if (data.texte_brut) results.appendChild(createSection('✨', 'Contenu généré', 'badge-ig', [{label: 'Résultat', text: data.texte_brut, cls: ''}], 'Contenu'));
 
   } else if (currentTab === 'mail') {
     const items = [];
-    if (data.sujet) items.push({label: 'Objet', text: data.sujet, cls: 'green'});
-    if (data.corps) items.push({label: 'Corps du mail', text: data.corps, cls: ''});
-    if (data.objet_alternatif) items.push({label: 'Objet alternatif', text: data.objet_alternatif, cls: 'yellow'});
+    if (data.sujet) items.push({label: '📌 Objet', text: data.sujet, cls: 'green'});
+    if (data.corps) items.push({label: '📝 Corps du mail', text: data.corps, cls: ''});
+    if (data.objet_alternatif) items.push({label: '💡 Objet alternatif', text: data.objet_alternatif, cls: 'yellow'});
     results.appendChild(createSection('📧', 'Mail professionnel', 'badge-mail', items, 'Mail'));
-
-  } else if (currentTab === 'devis') {
-    const items = [];
-    if (data.titre) items.push({label: 'Titre', text: data.titre, cls: 'yellow'});
-    if (data.introduction) items.push({label: 'Introduction', text: data.introduction, cls: ''});
-    if (data.prestations) items.push({label: 'Prestations', text: data.prestations.join('\n'), cls: 'green'});
-    if (data.conditions) items.push({label: 'Conditions', text: data.conditions, cls: ''});
-    if (data.conclusion) items.push({label: 'Conclusion', text: data.conclusion, cls: ''});
-    if (data.validite) items.push({label: 'Validité', text: data.validite, cls: 'yellow'});
-    results.appendChild(createSection('📄', 'Devis professionnel', 'badge-devis', items, 'Devis'));
-
-  } else if (currentTab === 'avis') {
-    const items = [];
-    if (data.reponse_courte) items.push({label: 'Réponse courte', text: data.reponse_courte, cls: ''});
-    if (data.reponse_complete) items.push({label: 'Réponse complète', text: data.reponse_complete, cls: 'green'});
-    if (data.reponse_alternative) items.push({label: 'Alternative', text: data.reponse_alternative, cls: 'yellow'});
-    results.appendChild(createSection('⭐', 'Réponses à l\'avis Google', 'badge-avis', items, 'Avis'));
 
   } else if (currentTab === 'relance') {
     const canal = document.getElementById('relanceCanal').value;
     const items = [];
-    if (data.message_1) items.push({label: `${canal} 1`, text: data.message_1, cls: ''});
-    if (data.message_2) items.push({label: `${canal} 2`, text: data.message_2, cls: 'purple'});
-    if (data.message_3) items.push({label: `${canal} 3 — Offre`, text: data.message_3, cls: 'green'});
+    if (data.message_1) items.push({label: `${canal} — Version 1`, text: data.message_1, cls: ''});
+    if (data.message_2) items.push({label: `${canal} — Version 2`, text: data.message_2, cls: 'purple'});
+    if (data.message_3) items.push({label: `${canal} — Version 3 (avec offre)`, text: data.message_3, cls: 'green'});
     results.appendChild(createSection('💬', 'Messages de relance', 'badge-relance', items, 'Relance'));
+
+  } else if (currentTab === 'devis') {
+    const items = [];
+    if (data.titre) items.push({label: '📄 Titre', text: data.titre, cls: 'yellow'});
+    if (data.introduction) items.push({label: '👋 Introduction', text: data.introduction, cls: ''});
+    if (data.prestations) items.push({label: '🔧 Prestations', text: Array.isArray(data.prestations) ? data.prestations.join('\n') : data.prestations, cls: 'green'});
+    if (data.conditions) items.push({label: '📋 Conditions', text: data.conditions, cls: ''});
+    if (data.conclusion) items.push({label: '✉️ Conclusion', text: data.conclusion, cls: ''});
+    if (data.validite) items.push({label: '⏱️ Validité', text: data.validite, cls: 'yellow'});
+    results.appendChild(createSection('📄', 'Devis professionnel', 'badge-devis', items, 'Devis'));
+
+  } else if (currentTab === 'avis') {
+    const items = [];
+    if (data.reponse_courte) items.push({label: '⚡ Réponse courte', text: data.reponse_courte, cls: ''});
+    if (data.reponse_complete) items.push({label: '✅ Réponse complète', text: data.reponse_complete, cls: 'green'});
+    if (data.reponse_alternative) items.push({label: '🔄 Alternative', text: data.reponse_alternative, cls: 'yellow'});
+    results.appendChild(createSection('⭐', 'Réponses à l\'avis Google', 'badge-avis', items, 'Avis'));
+
+  } else if (currentTab === 'bio') {
+    const items = [];
+    if (data.bio_courte) items.push({label: '⚡ Bio courte', text: data.bio_courte, cls: 'green'});
+    if (data.bio_complete) items.push({label: '📝 Bio complète', text: data.bio_complete, cls: ''});
+    if (data.bio_alternative) items.push({label: '🔄 Version alternative', text: data.bio_alternative, cls: 'yellow'});
+    if (data.cta) items.push({label: '👉 Call to action', text: data.cta, cls: 'purple'});
+    results.appendChild(createSection('✍️', 'Bio & Profil optimisé', 'badge-bio', items, 'Bio'));
+
+  } else if (currentTab === 'pub') {
+    const items = [];
+    if (data.accroche) items.push({label: '🔥 Accroche', text: data.accroche, cls: 'yellow'});
+    if (data.texte_principal) items.push({label: '📝 Texte principal', text: data.texte_principal, cls: ''});
+    if (data.description) items.push({label: '📋 Description', text: data.description, cls: 'green'});
+    if (data.cta) items.push({label: '👉 Bouton CTA', text: data.cta, cls: 'purple'});
+    if (data.variante_1) items.push({label: '🔄 Variante A/B', text: data.variante_1, cls: ''});
+    if (data.variante_2) items.push({label: '🔄 Variante 2', text: data.variante_2, cls: 'dark'});
+    results.appendChild(createSection('🎯', 'Textes publicitaires', 'badge-pub', items, 'Pub'));
+
+  } else if (currentTab === 'faq') {
+    if (data.faq && Array.isArray(data.faq)) {
+      results.appendChild(createSection('❓', 'FAQ Client', 'badge-faq',
+        data.faq.map((item, i) => ({label: `Q${i+1} : ${item.question}`, text: item.reponse, cls: i % 2 === 0 ? 'green' : 'purple'})),
+        'FAQ'));
+    }
   }
+
+  if (usageLeft <= 0) results.appendChild(createLimitBanner());
 }
 
 function createSection(icon, title, badgeCls, items, badgeLabel) {
   const section = document.createElement('div');
   section.className = 'result-section';
+  const validItems = items.filter(i => i && i.text);
   section.innerHTML = `
     <div class="result-header">
       <span class="result-header-icon">${icon}</span>
@@ -594,16 +841,24 @@ function createSection(icon, title, badgeCls, items, badgeLabel) {
       <span class="result-header-badge ${badgeCls}">${badgeLabel}</span>
     </div>
     <div class="result-items">
-      ${items.map(item => `
-        <div class="result-item ${item.cls}">
+      ${validItems.map(item => `
+        <div class="result-item ${item.cls || ''}">
           <div class="result-label">${item.label}</div>
-          <div class="result-text">${item.text}</div>
-          <button class="copy-btn" onclick="copyText(this, \`${item.text.replace(/`/g,"'")}\`)">Copier</button>
+          <div class="result-text">${escapeHtml(item.text)}</div>
+          <button class="copy-btn" onclick="copyText(this, ${JSON.stringify(item.text)})">Copier</button>
         </div>
       `).join('')}
     </div>
   `;
   return section;
+}
+
+function escapeHtml(text) {
+  return String(text)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 
 function showSkeletons() {
@@ -638,12 +893,13 @@ function showLimit() {
   document.getElementById('results').appendChild(createLimitBanner());
 }
 
-function showError(message) {
+function showErrorBanner(emoji, title, desc, showRetry) {
   document.getElementById('results').innerHTML = `
-    <div class="empty">
-      <div class="empty-emoji">⚠️</div>
-      <h3 class="empty-title">Erreur de génération</h3>
-      <p class="empty-desc">${message || 'Une erreur est survenue. Réessayez dans quelques instants.'}</p>
+    <div class="error-banner">
+      <div class="error-emoji">${emoji}</div>
+      <h3 class="error-title">${title}</h3>
+      <p class="error-desc">${desc}</p>
+      ${showRetry ? '<button class="retry-btn" onclick="generate()">🔄 Réessayer</button>' : ''}
     </div>
   `;
 }
